@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+package-lock.json
+LICENSE
+apps/web/LICENSE
+packages/rules/LICENSE
+content/LICENSE
+docs/LICENSE
+docs/design
+docs/specs
+playwright-report
+test-results
