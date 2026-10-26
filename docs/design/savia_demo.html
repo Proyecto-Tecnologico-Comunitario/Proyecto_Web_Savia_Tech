@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SaviaTech · Demo interactiva</title>
+<style>
+:root{--bg:#eef3ee;--sf:#fff;--ink:#1c2824;--mut:#5a6b64;--ac:#2d7a58;--acs:#dcefe5;--wa:#7a4f00;--was:#fbefd2;--da:#a8322a;--das:#f8dedb;--bd:#cfdad3;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a17;--sf:#1b2622;--ink:#e6efea;--mut:#9db0a8;--ac:#6cc79c;--acs:#1f3a2e;--wa:#f0c36a;--was:#3a2e12;--da:#ff9c92;--das:#43211d;--bd:#2f3f38}}
+:root[data-theme="dark"]{--bg:#121a17;--sf:#1b2622;--ink:#e6efea;--mut:#9db0a8;--ac:#6cc79c;--acs:#1f3a2e;--wa:#f0c36a;--was:#3a2e12;--da:#ff9c92;--das:#43211d;--bd:#2f3f38}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--sf);z-index:10}
+.app{max-width:440px;margin:0 auto}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;display:flex;align-items:center;gap:6px;padding:10px 12px;background:var(--sf);border-bottom:1px solid var(--bd)}
+.sp{flex:1}.tag{font-size:12px;color:var(--mut)}
+button{font:inherit;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);color:var(--ink);cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+button.p{background:var(--ac);border-color:var(--ac);color:var(--bg);font-weight:600}
+button.p:disabled{opacity:.45;cursor:not-allowed}
+button.ex{border-color:var(--da);color:var(--da);font-weight:600}
+main{padding:16px 14px 40px}
+h1{font-size:22px;margin:4px 0 8px}h2{font-size:18px;margin:16px 0 6px}
+.c{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;margin:10px 0}
+.m{color:var(--mut);font-size:14px}
+.o{display:block;width:100%;text-align:left;margin:8px 0}
+.o.on{background:var(--acs);border-color:var(--ac);font-weight:600}
+.bd{display:inline-block;padding:2px 10px;border-radius:99px;font-size:14px;font-weight:600}
+.b0,.b1{background:var(--acs);color:var(--ac)}.b2,.b3{background:var(--was);color:var(--wa)}.b4{background:var(--das);color:var(--da)}
+.al{background:var(--das);border:1px solid var(--da);color:var(--ink);border-radius:10px;padding:14px;margin:10px 0}
+input,textarea,select{font:inherit;width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--sf);color:var(--ink)}
+.row{display:flex;gap:8px;margin-top:10px}.row>button{flex:1}
+.err{color:var(--da);font-size:14px;margin:6px 0}
+.pr{border-left:4px solid var(--da)}
+</style></head><body>
+<div class="app">
+<header class="bar"><b>🌿 SaviaTech</b><span class="tag" id="tag"></span><span class="sp"></span>
+<button onclick="A.lang()" aria-label="Idioma / Language" id="lg"></button>
+<button id="lk" onclick="A.lock()"></button><button id="ex" class="ex" onclick="A.exit()"></button></header>
+<main id="main"></main>
+<p class="m" style="padding:0 14px 24px" id="ft"></p>
+</div>
+<script>
+const T={
+es:{demo:'Demo · datos simulados',ft:'Esta es una maqueta interactiva para mostrar el flujo. No es el prototipo funcional ni se usa con casos reales. Los datos solo viven en memoria. Ítems abreviados de ejemplo: no usar clínicamente.',
+setpin:'Crea un PIN de 6 dígitos',pin:'Ingresa tu PIN',pinN:'En el prototipo real, el PIN cifrará los datos en el dispositivo y la app funcionará sin conexión.',go:'Entrar',mk:'Crear PIN',bad:'PIN incorrecto. Usa 6 dígitos.',lock:'Bloquear',exit:'Salida rápida',
+cases:'Casos',nc:'Nuevo caso',none:'Aún no hay casos. Crea uno para ver el flujo.',code:'Código del caso',ct:'Consentimiento informado',
+cx:'Explique con palabras sencillas qué datos se recogen, para qué se usan y que puede retirar su consentimiento cuando quiera. [TEXTO DE EJEMPLO: lo redacta Trabajo Social]',cb:'La persona entendió y aceptó',st:'Iniciar tamizaje',
+sc:'Tamizaje tipo PHQ-9',of:'de',bk:'Atrás',nx:'Siguiente',fin:'Ver resultado',
+op:['Nunca','Varios días','Más de la mitad de los días','Casi todos los días'],
+it:['Poco interés o placer al hacer las cosas','Tristeza, desánimo o desesperanza','Problemas para dormir o dormir demasiado','Cansancio o poca energía','Poco apetito o comer en exceso','Sentimientos de fracaso o de culpa','Dificultad para concentrarse','Lentitud o inquietud notables al moverse o hablar','Pensamientos de morir o de hacerse daño'],
+sa:'Alerta de seguridad',sx:'La respuesta al ítem 9 es positiva. Siga el protocolo de crisis de su equipo antes de continuar. [TEXTO DE EJEMPLO: lo define Trabajo Social]',ct2:'Continuar al resultado',
+rs:'Resultado',pt:'Puntaje',bn:['Mínimo','Leve','Moderado','Moderadamente severo','Severo'],why:'Respuestas que más pesaron',nw:'Ninguna respuesta con valor alto.',
+fl:'Decisión final de la profesional',jt:'Justificación (obligatoria si cambia el nivel)',jr:'Escribe una justificación para cambiar el nivel.',sv:'Guardar y ver ruta',dx:'Apoyo a la decisión: no es un diagnóstico.',
+rf:'Ruta de remisión',pri:'Ruta prioritaria',vf:'Última verificación',smp:'DATOS DE EJEMPLO',hm:'Volver a casos',nt:'Notas',nn:'No hay notas.',op2:'Abrir',
+R:[['Urgencias del hospital local','[teléfono de ejemplo]',1],['Comisaría de familia','[teléfono de ejemplo]',0],['Centro de salud: salud mental','[teléfono de ejemplo]',0]]},
+en:{demo:'Demo · simulated data',ft:'This is an interactive mock-up to show the flow. It is not the working prototype and must not be used with real cases. Data lives in memory only. Shortened sample items: not for clinical use.',
+setpin:'Create a 6-digit PIN',pin:'Enter your PIN',pinN:'In the real prototype, the PIN will encrypt data on the device and the app will work offline.',go:'Enter',mk:'Create PIN',bad:'Wrong PIN. Use 6 digits.',lock:'Lock',exit:'Quick exit',
+cases:'Cases',nc:'New case',none:'No cases yet. Create one to see the flow.',code:'Case code',ct:'Informed consent',
+cx:'Explain in plain words what data is collected, what it is used for, and that consent can be withdrawn at any time. [SAMPLE TEXT: written by Social Work]',cb:'The person understood and agreed',st:'Start screening',
+sc:'PHQ-9-style screening',of:'of',bk:'Back',nx:'Next',fin:'See result',
+op:['Not at all','Several days','More than half the days','Nearly every day'],
+it:['Little interest or pleasure in doing things','Feeling down or hopeless','Trouble sleeping or sleeping too much','Tiredness or low energy','Poor appetite or overeating','Feelings of failure or guilt','Trouble concentrating','Noticeable slowness or restlessness','Thoughts of death or of self-harm'],
+sa:'Safety alert',sx:'The answer to item 9 is positive. Follow your team’s crisis protocol before continuing. [SAMPLE TEXT: defined by Social Work]',ct2:'Continue to result',
+rs:'Result',pt:'Score',bn:['Minimal','Mild','Moderate','Moderately severe','Severe'],why:'Answers that weighed most',nw:'No high-value answers.',
+fl:'Professional’s final decision',jt:'Justification (required if the level changes)',jr:'Write a justification to change the level.',sv:'Save and see pathway',dx:'Decision support: not a diagnosis.',
+rf:'Referral pathway',pri:'Priority route',vf:'Last verified',smp:'SAMPLE DATA',hm:'Back to cases',nt:'Notes',nn:'No notes.',op2:'Open',
+R:[['Local hospital emergency unit','[sample phone]',1],['Family protection office','[sample phone]',0],['Health centre: mental health','[sample phone]',0]]}};
+let L='es',S={v:'lock',pin:null,ret:'home',q:0,a:Array(9).fill(null),code:'',cases:[],ok:false,e:''};
+const t=k=>T[L][k],$=s=>document.querySelector(s),band=s=>s<5?0:s<10?1:s<15?2:s<20?3:4;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const score=()=>S.a.reduce((x,y)=>x+(y||0),0);
+function nid(){const c='ABCDEFGHJKMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(8));let s='';r.forEach((n,i)=>{s+=c[n%c.length];if(i==3)s+='-'});return s}
+const A={
+lang(){L=L=='es'?'en':'es';document.documentElement.lang=L;R()},
+lock(){if(S.v!='lock'&&S.v!='neu')S.ret=S.v;S.v='lock';S.e='';R()},
+exit(){S.a=Array(9).fill(null);S.q=0;S.code='';S.ok=false;S.ret='home';S.v='neu';R()},
+pin(){const v=$('#pin').value;if(!/^\d{6}$/.test(v)){S.e=t('bad');return R()}
+ if(!S.pin){S.pin=v}else if(v!==S.pin){S.e=t('bad');return R()}
+ S.e='';S.v=S.ret;R()},
+nw(){S.f=null;S.code=nid();S.a=Array(9).fill(null);S.q=0;S.ok=false;S.v='con';R()},
+chk(){S.ok=$('#cb').checked;$('#stb').disabled=!S.ok},
+st(){S.v='scr';R()},
+pk(i){S.a[S.q]=i;R()},
+nx(){if(S.q<8){S.q++;R()}else{S.v=S.a[8]>0?'saf':'res';S.fin=null;R()}},
+bk(){if(S.q>0){S.q--;R()}},
+res(){S.v='res';R()},
+sv(){const s=score(),b=band(s),f=+$('#fl').value,j=$('#jt').value.trim();
+ if(f!==b&&!j){S.e=t('jr');S.f=f;return R()}
+ S.e='';S.f=null;S.cases.unshift({c:S.code,s,b,f,saf:S.a[8]>0});S.v='ref';R()},
+home(){S.v='home';R()},
+op(){S.v='lock';R()}};
+function R(){const v=S.v,u=v!='lock'&&v!='neu',h=[];
+ $('#tag').textContent=t('demo');$('#ft').textContent=t('ft');$('#lg').textContent=L=='es'?'EN':'ES';
+ $('#lk').textContent='🔒 '+t('lock');$('#ex').textContent=t('exit');$('#lk').hidden=$('#ex').hidden=!u;
+ if(v=='lock'){h.push(`<h1>${S.pin?t('pin'):t('setpin')}</h1><div class="c"><input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" aria-label="PIN"><div class="err">${esc(S.e)}</div><p class="m">${t('pinN')}</p><button class="p o" onclick="A.pin()" style="text-align:center">${S.pin?t('go'):t('mk')}</button></div>`)}
+ if(v=='neu'){h.push(`<h1>${t('nt')}</h1><div class="c m">${t('nn')}</div><button onclick="A.op()">${t('op2')}</button>`)}
+ if(v=='home'){h.push(`<h1>${t('cases')}</h1><button class="p" onclick="A.nw()">+ ${t('nc')}</button>`);
+  if(!S.cases.length)h.push(`<p class="m">${t('none')}</p>`);
+  S.cases.forEach(c=>h.push(`<div class="c"><b>${c.c}</b> <span class="bd b${c.f}">${t('bn')[c.f]}</span><div class="m">${t('pt')}: ${c.s}${c.saf?' · ⚠ '+t('sa'):''}</div></div>`))}
+ if(v=='con'){h.push(`<h1>${t('ct')}</h1><p class="m">${t('code')}: <b>${S.code}</b></p><div class="c">${t('cx')}</div><label class="c" style="display:flex;gap:10px;align-items:center"><input id="cb" type="checkbox" style="width:24px;height:24px" onchange="A.chk()" ${S.ok?'checked':''}>${t('cb')}</label><button id="stb" class="p" ${S.ok?'':'disabled'} onclick="A.st()">${t('st')}</button>`)}
+ if(v=='scr'){const q=S.q;h.push(`<h1>${t('sc')}</h1><p class="m">${q+1} ${t('of')} 9</p><progress max="9" value="${q+1}" style="width:100%"></progress><div class="c"><b>${q+1}. ${t('it')[q]}</b>${t('op').map((o,i)=>`<button class="o ${S.a[q]===i?'on':''}" onclick="A.pk(${i})">${o}</button>`).join('')}</div><div class="row"><button onclick="A.bk()" ${q?'':'disabled'}>${t('bk')}</button><button class="p" ${S.a[q]==null?'disabled':''} onclick="A.nx()">${q<8?t('nx'):t('fin')}</button></div>`)}
+ if(v=='saf'){h.push(`<div class="al" role="alert"><h1 style="margin-top:0">⚠ ${t('sa')}</h1>${t('sx')}</div><button class="p" onclick="A.res()">${t('ct2')}</button>`)}
+ if(v=='res'){const s=score(),b=band(s),d=S.a.map((x,i)=>[x,i]).filter(z=>z[0]>=2).sort((p,q)=>q[0]-p[0]);
+  h.push(`<h1>${t('rs')}</h1><p class="m">${t('code')}: <b>${S.code}</b></p><div class="c"><div>${t('pt')}: <b>${s}</b> / 27</div><p><span class="bd b${b}">${t('bn')[b]}</span></p><h2>${t('why')}</h2>${d.length?'<ul>'+d.map(z=>`<li>${t('it')[z[1]]} (${z[0]})</li>`).join('')+'</ul>':`<p class="m">${t('nw')}</p>`}<p class="m">${t('dx')}</p></div><div class="c"><label for="fl"><b>${t('fl')}</b></label><select id="fl">${t('bn').map((n,i)=>`<option value="${i}" ${i==(S.f==null?b:S.f)?'selected':''}>${n}</option>`).join('')}</select><label for="jt" class="m">${t('jt')}</label><textarea id="jt" rows="3"></textarea><div class="err">${esc(S.e)}</div></div><button class="p" onclick="A.sv()">${t('sv')}</button>`)}
+ if(v=='ref'){const c=S.cases[0],hi=c.f>=3||c.saf,r=T[L].R.slice().sort((x,y)=>hi?y[2]-x[2]:0);
+  h.push(`<h1>${t('rf')}</h1><span class="bd b4" style="background:var(--was);color:var(--wa)">${t('smp')}</span>`);
+  r.forEach((x,i)=>h.push(`<div class="c ${hi&&i==0?'pr':''}">${hi&&i==0?`<b>${t('pri')}</b><br>`:''}<b>${x[0]}</b><div class="m">${x[1]} · ${t('vf')}: [${L=='es'?'fecha':'date'}]</div></div>`));
+  h.push(`<button class="p" onclick="A.home()">${t('hm')}</button>`)}
+ $('#main').innerHTML=h.join('');const p=$('#pin');if(p)p.focus()}
+let tm;function arm(){clearTimeout(tm);tm=setTimeout(()=>{if(S.pin&&S.v!='lock'&&S.v!='neu')A.lock()},120000)}
+['click','keydown','touchstart'].forEach(e=>addEventListener(e,arm));
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.pin&&S.v!='lock'&&S.v!='neu')A.lock()});
+R();
+</script></body></html>

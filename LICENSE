@@ -1,0 +1,19 @@
+SaviaTech repository licensing
+=============================
+
+This repository is a monorepo and does not grant a single licence for the whole
+tree. Each component has its own licence, and the full licence texts are kept
+next to the code they cover:
+
+  packages/rules/   MIT
+  apps/web/         GPL-3.0-or-later
+  content/          CC-BY-4.0
+  docs/             CC-BY-4.0
+  scripts/ and root tooling files   MIT
+
+The authoritative licence for a file is the SPDX identifier in its header or the
+LICENSE file in its component directory. If those are missing or contradictory,
+open an issue before reusing the code.
+
+Clinical content, consent text and referral data are placeholders marked SAMPLE
+and require Social Work review before any real-world use. See AGENTS.md.
