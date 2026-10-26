@@ -7,8 +7,9 @@ pathways. The professional makes every decision; the tool never diagnoses.
 This repository contains the **frontend only**. A backend, if needed, lives in a separate repository
 and is not part of v1. See `docs/specs/TR-001-vertical-slice.md` for the current scope.
 
-> Status: repository scaffold (TR-001 task T1). The lock, case, screening, encryption and PWA flows
-> are implemented in later tasks. Nothing in this repository is ready for real personal data.
+> Status: rules engine (TR-001 task T2). Instrument validation, scoring, bands and the safety alert
+> exist with tests. The lock, case, encryption, screening UI and PWA flows are implemented in later
+> tasks. Nothing in this repository is ready for real personal data.
 
 ## Requirements
 
@@ -42,11 +43,15 @@ npm run format     # write Prettier formatting
 
 ```text
 apps/web/          React + Vite PWA
-packages/rules/    pure TypeScript scoring and safety rules
+packages/rules/    pure TypeScript validation, scoring and safety rules
 content/           versioned clinical content (SAMPLE data only)
 docs/              specifications, design reference, threat model, ADRs
 scripts/           repository tooling
 ```
+
+The rules engine exposes `validateInstrument`, `validateAnswers`, `scoreAnswers`, `bandForScore`,
+`hasSafetyAlert` and `evaluateScreening`. Its JSDoc is in Spanish to support the current audit;
+identifiers and validation messages remain in English.
 
 `docs/design/savia_demo.html` is a visual and copy reference only. Its code is not reused.
 
