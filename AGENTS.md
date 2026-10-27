@@ -28,8 +28,8 @@ features, speed and elegance.
    content. Placeholders must be marked `SAMPLE` in the file and visibly in the UI.
 7. Open source end to end. Do not introduce any proprietary or closed backend, SDK or hosted service.
 8. Dependencies: OSI-approved permissive licences only. Pre-approved: react, react-dom, vite,
-   vite-plugin-pwa, workbox, dexie, typescript, vitest, playwright, eslint, prettier. Ask before adding
-   anything else, and say why.
+   vite-plugin-pwa, workbox, dexie, fake-indexeddb (tests only), typescript, vitest, playwright, eslint,
+   prettier. Ask before adding anything else, and say why.
 
 ## Repository layout
 
@@ -42,6 +42,7 @@ docs/threat-model.md
 content/           instruments, consent text, referral samples (CC-BY-4.0, each file has metadata)
 packages/rules/    pure TypeScript engine: scoring, bands, safety alerts (no DOM, no I/O)
 apps/web/          the PWA (React + Vite)
+apps/web/src/crypto/  PIN-derived key hierarchy, wrapped data key and record encryption
 .github/workflows/ci.yml
 ```
 
@@ -53,7 +54,7 @@ npm run dev       start the web app
 npm run lint      eslint + prettier check
 npm run typecheck tsc --noEmit for all workspaces
 npm test          unit tests (vitest)
-npm run e2e       end-to-end tests (playwright, includes the offline flow)
+npm run e2e       end-to-end tests (playwright, includes the offline flow; available from T7)
 npm run build     production build
 npm run licenses  fail on non-permissive dependency licences
 ```
@@ -63,8 +64,14 @@ npm run licenses  fail on non-permissive dependency licences
 - TypeScript strict, ES modules, no `any`. Small pure functions. The rules package must stay free of
   DOM, storage and network code.
 - All UI strings go in `apps/web/src/i18n/es.json` and `en.json`. No hard-coded user-facing text.
-- Code, comments, commits and docs are in English. Conventional Commits (`feat:`, `fix:`, `docs:`...).
-- One branch per task, named `tr-001/t<number>-<slug>`. Tests live next to the code they cover.
+- Repository documentation, identifiers, error messages, test names and Conventional Commit types are
+  in English. Commit descriptions are in Spanish, for example `feat(crypto): agrega derivación de la
+clave`. The existing Spanish specification in `docs/specs/` stays in Spanish.
+- Code comments and JSDoc are in Spanish. Comment non-obvious logic line by line, especially security
+  code, so a human auditor can follow each decision without translating.
+- One branch per task, named `<type>/t<number>-<slug>`, for example `feat/t3-cifrado` or
+  `docs/t8-documentacion`. `<type>` is the Conventional Commit type of the main change. Tests live next
+  to the code they cover.
 - Accessibility basics on every screen: labels, visible focus, touch targets of at least 44 px,
   WCAG 2.1 AA contrast, works in light and dark mode.
 - File headers carry an SPDX licence identifier.
@@ -84,7 +91,9 @@ npm run licenses  fail on non-permissive dependency licences
 4. Before saying a task is done, run lint, typecheck, tests and build, and report the results honestly.
 5. Finish with a short summary: what changed, what you were unsure about, and what needs a human decision.
 6. Record architecture decisions in `docs/adr/` (one short file each).
-7. Do not expand scope, refactor unrelated code or add features that are not in the spec.
+7. Keep the project documentation current when a task changes behaviour, architecture, commands or
+   conventions: README, task status in `docs/specs/`, threat model, SECURITY and the relevant ADRs.
+8. Do not expand scope, refactor unrelated code or add features that are not in the spec.
    If the spec is ambiguous or seems wrong, ask.
 
 ## Never do

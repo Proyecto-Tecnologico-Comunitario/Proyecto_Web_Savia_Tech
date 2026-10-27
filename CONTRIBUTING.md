@@ -14,10 +14,13 @@ priority over speed.
 
 ## Workflow
 
-- One branch per task: `tr-001/t<number>-<slug>`.
-- Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `chore:`.
+- One branch per task: `<type>/t<number>-<slug>`, for example `feat/t3-cifrado`.
+- Conventional Commits with an English type and a Spanish description: `feat(crypto): agrega ...`,
+  `test(crypto): cubre ...`, `docs: actualiza ...`.
 - Tests live next to the code they cover.
 - Keep `packages/rules` free of DOM, storage and network code.
+- Repository documentation, identifiers, error messages and test names are in English. Code comments
+  and JSDoc are in Spanish. UI text belongs in the i18n files.
 
 ## Local checks
 
