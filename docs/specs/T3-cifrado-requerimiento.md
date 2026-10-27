@@ -152,3 +152,92 @@ Backend/API, sincronización, tamizajes, interfaz de PIN más allá de lo mínim
 4. Ejecuta las pruebas y el linter después de cada paso.
 5. No modifiques archivos fuera de `src/crypto/` y el punto mínimo de integración con la capa de datos, salvo que lo justifiques.
 6. Al terminar, entrega el resumen de decisiones y dudas. No marques la tarea como terminada si falta algún criterio de la sección 6.
+
+---
+
+## 10. Estado de implementación
+
+Fecha: 2026-10-26. Rama: `feat/t3-cifrado`. No se han realizado commits; los cambios quedan para
+revisión y para que la persona responsable los commitee.
+
+Implementado:
+
+- Jerarquía PIN → PBKDF2-HMAC-SHA256 (600.000 iteraciones, sal de 16 bytes) → KEK AES-KW no extraíble
+  → DEK AES-GCM envuelta y no extraíble al desbloquear.
+- Cifrado por registro AES-GCM con IV de 12 bytes, tag de 128 bits y AAD `tabla|id|versión`.
+- Metadatos en Dexie con parámetros KDF, DEK envuelta, intentos fallidos y `lockedUntil`.
+- Llavero con `load`, `initialize`, `unlock`, `lock`, `changePin` y `withDataKey`.
+- `withDataKey` entrega una sesión acotada (`DataKeySession`) con `encrypt`, `decrypt` y `extractable`;
+  no expone el `CryptoKey` y vuelve a comprobar el bloqueo en cada llamada.
+- `load`, `initialize`, `unlock` y `changePin` se serializan dentro de un llavero. `lock()` incrementa
+  una generación que impide publicar una clave si la operación seguía en curso.
+- Re-envoltura de la DEK al cambiar el PIN, sin volver a cifrar registros. La DEK se desenvuelve
+  temporalmente como extraíble solo para AES-KW y se vuelve a desenvolver como no extraíble. Las
+  iteraciones de un almacén existente nunca se reducen.
+- Esperas por intentos: 0, 0, 5 s, 30 s y 5 min, persistidas y reiniciadas al acertar.
+- Validación de metadatos: versión, algoritmos, tamaños exactos de sal y DEK envuelta, iteraciones
+  mínimas y contadores. Una fila corrupta falla como `CorruptDataError`, no como PIN incorrecto.
+- Reglas ESLint específicas: sin `console`, sin `Math.random`, sin almacenamiento web y sin
+  importaciones criptográficas externas. La prueba estática recorre subdirectorios futuros.
+- 34 pruebas de criptografía y 51 pruebas de reglas pasando (85 en total).
+
+Pendiente para cerrar la tarea al 100 %:
+
+- Medir PBKDF2 en un Android de gama baja. En el equipo de desarrollo (Windows, Node.js 24.19.0) se
+  midieron aproximadamente 262 ms por derivación a 600.000 iteraciones. No se bajarán las iteraciones.
+- Revisión independiente humana del código criptográfico antes de la integración con T4. Ya se hizo una
+  revisión automatizada y se corrigieron sus hallazgos: carreras de intentos, bloqueo durante operaciones
+  en curso, exposición del `CryptoKey`, validación de metadatos y cobertura estática.
+- La comprobación de IndexedDB sin texto plano sobre casos reales corresponde a T4/T6; T3 solo crea la
+  tabla de metadatos.
+- Confirmar el benchmark y la revisión humana antes de considerar cumplidos todos los criterios de la
+  sección 6.
+
+Límites conocidos añadidos tras la revisión: no hay protección contra rollback de un ciphertext antiguo
+con el mismo `tabla|id|versión`; el contador de intentos se serializa dentro de un llavero, pero no entre
+pestañas; dos pestañas que inicialicen o cambien el PIN a la vez pueden sobrescribir los metadatos; los
+disparadores automáticos de bloqueo por inactividad y `visibilitychange` se conectan en T5/T6.
+
+### Commits sugeridos
+
+Los mensajes usan Conventional Commits con descripción en español, según `AGENTS.md`:
+
+1. `docs: actualiza las convenciones de ramas e idioma`
+   - `AGENTS.md`
+   - `CONTRIBUTING.md`
+   - `docs/adr/0004-language-conventions.md`
+2. `chore(web): configura Vitest y las dependencias del cifrado`
+   - `apps/web/package.json`
+   - `package-lock.json`
+3. `feat(crypto): agrega constantes, errores y utilidades de WebCrypto`
+   - `apps/web/src/crypto/constants.ts`
+   - `apps/web/src/crypto/errors.ts`
+   - `apps/web/src/crypto/webcrypto.ts`
+4. `feat(crypto): deriva la KEK con PBKDF2-HMAC-SHA256`
+   - `apps/web/src/crypto/kdf.ts`
+   - `apps/web/src/crypto/__tests__/kdf.test.ts`
+5. `feat(crypto): cifra registros con AES-GCM y AAD`
+   - `apps/web/src/crypto/recordCipher.ts`
+   - `apps/web/src/crypto/__tests__/recordCipher.test.ts`
+6. `feat(crypto): agrega el llavero y los metadatos persistentes`
+   - `apps/web/src/crypto/metadata.ts`
+   - `apps/web/src/crypto/keyring.ts`
+   - `apps/web/src/crypto/index.ts`
+   - `apps/web/src/crypto/__tests__/metadata.test.ts`
+   - `apps/web/src/crypto/__tests__/keyring.test.ts`
+   - `apps/web/src/storage/db.ts`
+   - `apps/web/src/storage/cryptoMetadataStore.ts`
+7. `test(crypto): verifica reglas estáticas del módulo`
+   - `apps/web/src/crypto/__tests__/static.test.ts`
+   - `eslint.config.js`
+8. `docs: documenta el cifrado local de la tarea 3`
+   - `README.md`
+   - `SECURITY.md`
+   - `docs/threat-model.md`
+   - `docs/adr/0003-local-encryption.md`
+   - `docs/specs/TR-001-vertical-slice.md`
+   - `docs/specs/T3-cifrado-requerimiento.md`
+   - `apps/web/src/crypto/README.md`
+
+Nota: `packages/rules/src/index.test.ts` solo recibió el salto de línea final que exige Prettier. Puede
+ir en un commit `style(rules): agrega salto de línea final` o junto con el commit de documentación.

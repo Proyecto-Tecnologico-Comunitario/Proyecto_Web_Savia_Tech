@@ -28,6 +28,18 @@ In scope:
 Out of scope for v1: backend, accounts, synchronisation and DHIS2 (separate repository and later
 requirements).
 
+## Current implementation
+
+TR-001 task T3 implements the local key hierarchy and record encryption in `apps/web/src/crypto`.
+PBKDF2-HMAC-SHA256 derives a non-extractable AES-KW key, which wraps a random AES-GCM data key. Each
+record uses a fresh IV and authenticated AAD. The PIN and the unwrapped data key are never persisted.
+The data key is never handed to callers: they get a bounded session that re-checks the lock, and a lock
+during an unlock operation prevents that operation from publishing a key.
+
+See `apps/web/src/crypto/README.md` and `docs/adr/0003-local-encryption.md` for parameters, limits and
+the PIN-change exception. The in-app attempt delay does not stop an offline attack against a copied
+IndexedDB.
+
 ## Handling data
 
 - Never send real case data, names, phone numbers or screenshots in a report. Use synthetic examples.
