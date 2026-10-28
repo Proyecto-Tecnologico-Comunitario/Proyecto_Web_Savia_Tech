@@ -1,6 +1,6 @@
 # Threat model (initial)
 
-- Status: draft, updated in TR-001 task T3. Needs review in T8.
+- Status: draft, updated in TR-001 tasks T3 and T4. Needs review in T8.
 - System: offline-first PWA for pseudonymous psychosocial screening by frontline professionals.
 - Data: pseudonymous case code, consent record, screening answers, scores, professional decision and
   referral pathway. No names or direct identifiers are required in v1.
@@ -49,6 +49,24 @@
 - Tests: wrong PIN, tampered ciphertext, changed AAD, unique IVs, non-extractable keys, persisted
   lockout, concurrent wrong PINs, lock during unlock and PIN change without re-encrypting records.
 
+## Implemented storage controls (T4)
+
+- Dexie database `saviatech`: version 2 keeps `cryptoMetadata` and adds `cases` with primary key `id`
+  and index `actualizadoEn`. The version 1 to 2 upgrade preserves the metadata row.
+- One case is one encrypted record. The row is exactly `{ id, v, iv, ct, actualizadoEn }`.
+- `id` is a random UUID generated with Web Crypto. `actualizadoEn` is ordering metadata. `createdAt`,
+  the pseudonymous code, consent and screenings live inside `ct`.
+- `create` and `update` validate the payload with `parseCasePayload`; a changed final band without a
+  written justification is rejected.
+- `list` decrypts only the requested page. A row that fails authentication or validation is reported in
+  `unreadableIds` without aborting the rest of the page.
+- `update` uses optimistic comparison: it decrypts and encrypts outside the IndexedDB transaction, then
+  compares `actualizadoEn` in a short read-write transaction. No Web Crypto call runs inside it.
+- `changePin` re-wraps the DEK only; case rows are not re-encrypted.
+- `requestPersistentStorage` and `estimateStorage` wrap `navigator.storage`. The UI warning is T5/T6.
+- Tests prove that a raw IndexedDB dump contains no case code, justification, instrument id or payload
+  field name, and that moved or altered ciphertext fails authentication.
+
 ## Known limitations
 
 - A PIN-derived key can be brute-forced offline if an attacker copies storage. The iteration count
@@ -58,10 +76,14 @@
   repeated attempts on the device.
 - Locking removes keys and decrypted state from memory on a best-effort basis. Browser memory
   management cannot be fully controlled.
-- Two browser tabs can hold independent unlocked keyrings; cross-tab lock and attempt-count
-  coordination is not part of T3. Concurrent `initialize` or `changePin` from two tabs can overwrite
-  the metadata row, so setup and PIN changes must be single-tab for now.
-- `actualizadoEn` is plaintext and unauthenticated. It is ordering metadata, not clinical evidence.
+- Two browser tabs can hold independent unlocked keyrings; cross-tab lock, attempt-count and case
+  write coordination is still open. The repository detects concurrent updates inside one database, but
+  two tabs can still race. Concurrent `initialize` or `changePin` from two tabs can overwrite the
+  metadata row, so setup and PIN changes must be single-tab for now.
+- The database name `saviatech` and the table name `cases` are visible in IndexedDB. T8 decides whether
+  the database name becomes build configuration (`VITE_DB_NAME`) or stays documented as a limit (D3).
+- `actualizadoEn` is plaintext and unauthenticated. It is ordering metadata, not clinical evidence. The
+  number of cases and their recency are therefore visible, even though their content is encrypted.
 - There is no anti-rollback protection. An attacker who can write IndexedDB can restore an older
   ciphertext for the same table, id and version, and it will decrypt. A later task needs an
   authenticated sequence or a server-side check if rollback matters for clinical decisions.
@@ -69,7 +91,8 @@
 - CSS `:visited`-style history leaks and browser autofill are outside our control; the app must not put
   case data in URLs or form fields that persist.
 - Quick exit and history replacement are best effort and vary by browser.
-- The raw IndexedDB test with case fields arrives with T4. T3 covers metadata and the record cipher.
+- T4 covers the raw IndexedDB case rows and the record cipher. The low-end Android performance
+  measurement for listing and decrypting pages is still pending.
 
 ## Out of scope for v1
 

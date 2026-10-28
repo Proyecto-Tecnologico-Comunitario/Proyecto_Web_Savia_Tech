@@ -36,9 +36,15 @@ record uses a fresh IV and authenticated AAD. The PIN and the unwrapped data key
 The data key is never handed to callers: they get a bounded session that re-checks the lock, and a lock
 during an unlock operation prevents that operation from publishing a key.
 
-See `apps/web/src/crypto/README.md` and `docs/adr/0003-local-encryption.md` for parameters, limits and
-the PIN-change exception. The in-app attempt delay does not stop an offline attack against a copied
-IndexedDB.
+TR-001 task T4 adds the encrypted case repository in `apps/web/src/storage`. A case row exposes only
+`id`, `v`, `iv`, `ct` and `actualizadoEn`; the case code, consent and screenings are inside `ct`.
+`list` decrypts only the requested page, and `update` compares `actualizadoEn` outside the IndexedDB
+transaction to detect concurrent changes. The database and table names, the number of cases and their
+update times remain visible in IndexedDB.
+
+See `apps/web/src/crypto/README.md`, `docs/adr/0003-local-encryption.md` and
+`docs/adr/0005-case-storage.md` for parameters, limits and the PIN-change exception. The in-app attempt
+delay does not stop an offline attack against a copied IndexedDB.
 
 ## Handling data
 

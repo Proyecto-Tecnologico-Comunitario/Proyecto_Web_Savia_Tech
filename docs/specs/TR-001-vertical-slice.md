@@ -1,6 +1,6 @@
 # TR-001: Vertical slice — offline, encrypted screening on a PWA
 
-- **Status:** in progress (T1–T3 implemented; T4 next)
+- **Status:** in progress (T1–T4 implemented; T5 next)
 - **Owner:** Technical Director
 - **Target:** working demo and public repository by 2026-11-03 (UNICEF deadline is 2026-11-04, 11:59 p.m. CET)
 - **Reference mock-up:** `docs/design/savia_demo.html` (flow, copy and layout only; it is vanilla JS with in-memory data, do not reuse its code)
@@ -67,9 +67,13 @@ supervisor dashboard, analytics or tracking, push notifications, real personal d
   least 600,000 iterations (make it a config constant and benchmark it on a low-end phone).
 - The data key is stored only in wrapped form (encrypted with the key-encryption key). A correct PIN
   is verified by successfully unwrapping it. The PIN itself is never stored.
-- Each case record is stored as `{ id, createdAt, iv, ciphertext }`. The IV is random, 12 bytes, unique
-  per write. The record id is used as additional authenticated data (AAD).
-- Only `id` and `createdAt` are indexed. Everything else is inside the ciphertext.
+- Each case record is stored as `{ id, v, iv, ct, actualizadoEn }`. `id`, `v`, `iv`, `ct` and
+  `actualizadoEn` are the only fields in clear. `createdAt` lives inside the encrypted payload. The IV
+  is random, 12 bytes, unique per write. The record id and format version are used as additional
+  authenticated data (AAD), together with the table name.
+- Only `id` (primary key) and `actualizadoEn` are indexed. Everything else is inside the ciphertext.
+  `actualizadoEn` is ordering metadata, not clinical evidence. See ADR-0005 for the correction to this
+  section (T4 decision D1).
 - Decrypted payload shape (TypeScript types live in `packages/rules` or `apps/web/src/model`):
 
 ```json

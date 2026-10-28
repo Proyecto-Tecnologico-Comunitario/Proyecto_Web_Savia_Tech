@@ -100,9 +100,30 @@ who copies IndexedDB can attack the PIN offline.
 
 ## Storage integration
 
-`apps/web/src/storage/db.ts` defines the Dexie database and the `cryptoMetadata` table. T4 adds case
-tables to the same database. `DexieCryptoMetadataStore` implements the metadata port; the keyring never
-imports Dexie.
+`apps/web/src/storage/db.ts` defines the Dexie database `saviatech`. Version 1 has `cryptoMetadata`;
+version 2 adds `cases` with primary key `id` and index `actualizadoEn`. The upgrade preserves the
+metadata row. `DexieCryptoMetadataStore` implements the metadata port; the keyring never imports Dexie.
+
+`apps/web/src/storage/caseRepository.ts` is the only path from case data to IndexedDB. It receives a
+`db` and a `keyring`, uses `keyring.withDataKey` for every operation and returns `CaseRecord` objects.
+The UI imports through `storage/index.ts` and never touches Dexie or a `CryptoKey`.
+
+A case row is exactly `{ id, v, iv, ct, actualizadoEn }`:
+
+- `id` is a random UUID, used as the primary key and AAD input;
+- `actualizadoEn` is ordering metadata, not authenticated and not clinical evidence;
+- `createdAt`, the case code, consent and screenings live inside `ct`.
+
+`list` decrypts only the requested page and reports rows that fail authentication or validation in
+`unreadableIds`. `update` decrypts outside any IndexedDB transaction, encrypts with a fresh IV and then
+uses a short read-write transaction to compare `actualizadoEn`; a mismatch raises
+`ConcurrentModificationError`. No Web Crypto call runs inside that transaction. `changePin` still only
+re-wraps the DEK, so case rows are unchanged.
+
+`apps/web/src/storage/persistence.ts` wraps `navigator.storage.persist()` and `estimate()`. It is not
+called at import time. The persistence warning belongs to the app shell in T5/T6.
+
+See `docs/adr/0005-case-storage.md` for the decision record.
 
 ## Tests
 
@@ -121,6 +142,10 @@ Measured on the development machine (Windows, Node.js 24.19.0): approximately **
 PBKDF2-HMAC-SHA256 derivation at 600,000 iterations. A low-end Android measurement is still pending.
 The iteration count must not be lowered to make the benchmark pass.
 
+The T4 test with 1,000 cases proves page-only decryption, but it runs in Node. Listing and decrypting a
+page on a low-end Android device is still a pending manual measurement; the Node timing is not a device
+benchmark.
+
 ## Known limits
 
 - A six-digit PIN is weak against an offline attack. PBKDF2 raises the cost but does not remove it.
@@ -136,4 +161,9 @@ The iteration count must not be lowered to make the benchmark pass.
   for the same table, id and version, and it will decrypt.
 - Metadata tampering can cause a denial of service but cannot reveal the plaintext.
 - Automatic lock triggers (inactivity and page hide) are wired by the app shell in T5/T6.
-- Persistent storage and backup are handled by later tasks.
+- The database and table names (`saviatech`, `cases`), the number of cases and their `actualizadoEn`
+  values are visible in IndexedDB. The case code, consent and screening content stay encrypted.
+- Persistent storage is requested by `storage/persistence.ts`; backup and restore are later tasks.
+- The repository protects against concurrent updates inside one database. Two tabs still hold
+  independent keyrings and cross-tab coordination is future work.
+- There is no search, logical deletion, wipe or consent revocation in v1.
