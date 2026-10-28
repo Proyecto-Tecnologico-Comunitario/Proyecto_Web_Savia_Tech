@@ -21,3 +21,24 @@ export class InvalidCaseDataError extends StorageDomainError {
     super('Case data is invalid');
   }
 }
+
+/** El caso solicitado no existe. */
+export class CaseNotFoundError extends StorageDomainError {
+  constructor() {
+    super('Case not found');
+  }
+}
+
+/** La fila cambió desde que se leyó; la actualización no se aplica para no perder cambios. */
+export class ConcurrentModificationError extends StorageDomainError {
+  constructor() {
+    super('Case was modified concurrently');
+  }
+}
+
+/** Se intentó cambiar un campo que debe permanecer inmutable. */
+export class ImmutableFieldError extends StorageDomainError {
+  constructor() {
+    super('Case field cannot be changed');
+  }
+}

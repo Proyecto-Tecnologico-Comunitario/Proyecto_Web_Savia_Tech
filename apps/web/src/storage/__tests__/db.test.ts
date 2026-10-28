@@ -8,7 +8,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { CRYPTO_METADATA_KEY } from '../../crypto/constants';
 import { createKeyring } from '../../crypto/keyring';
 import type { CryptoMetadata, CryptoMetadataStore } from '../../crypto/metadata';
-import { type CasePayload, parseCasePayload } from '../../model/case';
+import type { CasePayload } from '../../model/case';
+import { createCaseRepository } from '../caseRepository';
 import { DexieCryptoMetadataStore } from '../cryptoMetadataStore';
 import { type CryptoMetadataRow, SaviaDatabase } from '../db';
 
@@ -150,22 +151,23 @@ describe('SaviaDatabase migration', () => {
     await keyring.unlock(PIN);
     expect(keyring.getState()).toBe('unlocked');
 
-    // La tabla `cases` acepta una fila cifrada y permite recuperarla con la DEK migrada.
-    const id = '00000000-0000-4000-8000-000000000001';
-    const record = await keyring.withDataKey((session) => session.encrypt('cases', id, PAYLOAD));
-    await migrated.cases.add(record);
+    // El repositorio puede crear y recuperar casos sobre la base ya migrada.
+    const repository = createCaseRepository({ db: migrated, keyring });
+    const created = await repository.create({
+      consent: PAYLOAD.consent,
+      synthetic: PAYLOAD.synthetic,
+      screenings: PAYLOAD.screenings,
+    });
 
-    const row = await migrated.cases.get(id);
-    if (row === undefined) {
-      throw new Error('Expected the case row after migration');
-    }
+    // La marca sintética y el contenido clínico se conservan.
+    expect(created.synthetic).toBe(true);
+    expect(created.screenings).toEqual(PAYLOAD.screenings);
 
-    // El índice de ordenación queda en claro y la carga útil sigue cifrada.
-    expect(row.actualizadoEn).toBe(record.actualizadoEn);
-
-    const decrypted = await keyring.withDataKey((session) =>
-      session.decrypt<unknown>('cases', id, row),
-    );
-    expect(parseCasePayload(decrypted)).toEqual(PAYLOAD);
+    // La lectura posterior confirma que la DEK migrada sigue sirviendo para descifrar.
+    await expect(repository.get(created.id)).resolves.toEqual(created);
+    await expect(repository.list()).resolves.toEqual({
+      items: [created],
+      unreadableIds: [],
+    });
   });
 });
