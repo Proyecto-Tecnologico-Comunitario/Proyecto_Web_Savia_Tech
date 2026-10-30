@@ -1,6 +1,6 @@
 # Threat model (initial)
 
-- Status: draft, updated in TR-001 tasks T3 and T4. Needs review in T8.
+- Status: draft, updated in TR-001 tasks T3, T4 and T5. Needs review in T8.
 - System: offline-first PWA for pseudonymous psychosocial screening by frontline professionals.
 - Data: pseudonymous case code, consent record, screening answers, scores, professional decision and
   referral pathway. No names or direct identifiers are required in v1.
@@ -63,9 +63,27 @@
 - `update` uses optimistic comparison: it decrypts and encrypts outside the IndexedDB transaction, then
   compares `actualizadoEn` in a short read-write transaction. No Web Crypto call runs inside it.
 - `changePin` re-wraps the DEK only; case rows are not re-encrypted.
-- `requestPersistentStorage` and `estimateStorage` wrap `navigator.storage`. The UI warning is T5/T6.
+- `requestPersistentStorage` and `estimateStorage` wrap `navigator.storage`. The shell requests
+  persistence after unlock and Home/Settings show the result.
 - Tests prove that a raw IndexedDB dump contains no case code, justification, instrument id or payload
   field name, and that moved or altered ciphertext fails authentication.
+
+## Implemented UI shell controls (T5)
+
+- The shell renders protected screens only while `vaultController` reports `unlocked`. The protected
+  tree is keyed by the vault epoch, so every lock unmounts it instead of hiding it with CSS.
+- The PIN is read from the DOM only when the form is submitted and is cleared in `finally`, including
+  validation failures. It is never copied to React state, storage, URLs, logs or error messages.
+- Wrong PINs show a generic message. A lock during setup or unlock is silent and never publishes
+  `unlocked`. The retry countdown is shown only after the keyring rejects an attempt.
+- Automatic lock compares the deadline against the last activity, locks immediately on
+  `visibilitychange`/`pagehide`, and offers only 1, 2 or 5 minutes.
+- Quick exit locks first, then shows the neutral "Notas" screen, replaces the current history entry and
+  changes the document title. It is synchronous and works from the PIN screens too.
+- The router is in memory and the URL never contains routes or case ids.
+- `localStorage` is limited to `saviatech.settings` (language and timeout) through one module. ESLint
+  and a static test forbid it elsewhere.
+- Persistent storage is requested after a successful setup or unlock, never at import time.
 
 ## Known limitations
 
@@ -90,7 +108,17 @@
 - Forgetting the PIN makes local data unrecoverable in v1.
 - CSS `:visited`-style history leaks and browser autofill are outside our control; the app must not put
   case data in URLs or form fields that persist.
-- Quick exit and history replacement are best effort and vary by browser.
+- Quick exit and history replacement are best effort and vary by browser. The app switcher may retain a
+  screenshot of the previous screen until the operating system or browser discards it, and the browser
+  may keep history entries the app cannot remove.
+- Android Back leaves the app instead of moving through in-app screens. Users rely on the on-screen
+  Back button.
+- `saviatech.settings` is visible and writable by anyone with local access. It contains only language
+  and timeout; it protects nothing and an invalid value falls back to the default.
+- The retry countdown is known only after the keyring rejects an attempt; the UI does not read
+  metadata ahead of time.
+- The UI does not offer a PIN change. If someone knows the current PIN, the professional cannot change
+  it from the app (D6, open decision).
 - T4 covers the raw IndexedDB case rows and the record cipher. The low-end Android performance
   measurement for listing and decrypting pages is still pending.
 

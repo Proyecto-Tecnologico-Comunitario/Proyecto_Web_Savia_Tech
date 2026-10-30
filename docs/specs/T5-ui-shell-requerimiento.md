@@ -341,7 +341,7 @@ export function createSettingsStore(storage: Pick<Storage, 'getItem' | 'setItem'
 
 ### 5.12 Estilos y accesibilidad
 
-- Archivos CSS planos en `src/styles/`, importados desde `main.tsx`. Variables CSS en `tokens.css`, modo claro por defecto y `@media (prefers-color-scheme: dark)`; `:root { color-scheme: light dark; }`.
+- Archivos CSS planos en `src/styles/`, enlazados desde `index.html` en orden `tokens.css`, `base.css`, `components.css` (ver ADR-0006). Variables CSS en `tokens.css`, modo claro por defecto y `@media (prefers-color-scheme: dark)`; `:root { color-scheme: light dark; }`.
 - Tokens sugeridos (contrastes ya calculados; verifica que los usas tal cual):
 
 | Token | Claro | Oscuro | Contraste |

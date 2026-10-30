@@ -1,6 +1,6 @@
 # TR-001: Vertical slice — offline, encrypted screening on a PWA
 
-- **Status:** in progress (T1–T4 implemented; T5 next)
+- **Status:** in progress (T1–T5 implemented; T6 next)
 - **Owner:** Technical Director
 - **Target:** working demo and public repository by 2026-11-03 (UNICEF deadline is 2026-11-04, 11:59 p.m. CET)
 - **Reference mock-up:** `docs/design/savia_demo.html` (flow, copy and layout only; it is vanilla JS with in-memory data, do not reuse its code)
@@ -172,6 +172,9 @@ placeholder, all marked SAMPLE). Do not invent real phone numbers, hotlines or i
 | T7 | PWA and offline: service worker, manifest, offline e2e, performance budget | Offline e2e passes, budget met |
 | T8 | Docs: README with demo steps, `docs/threat-model.md`, SECURITY.md, ADRs | A new person can run the demo from the README |
 | T9 | Synthetic demo data and demo script (dev-only seed, all records `synthetic: true`) | The 2-minute script runs end to end |
+
+T5 is implemented: the shell, in-memory router, PIN screens, automatic lock, quick exit, i18n, settings
+and the Playwright lock/quick-exit tests are in place. See `docs/adr/0006-ui-shell.md`.
 
 ## 10. Demo script (for the 2-minute video)
 

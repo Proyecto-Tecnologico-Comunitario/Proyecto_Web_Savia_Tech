@@ -125,6 +125,21 @@ called at import time. The persistence warning belongs to the app shell in T5/T6
 
 See `docs/adr/0005-case-storage.md` for the decision record.
 
+## UI integration
+
+`apps/web/src/app/createApp.ts` creates one keyring, the case repository, the vault controller, the
+router and the settings store, then exposes them through React context. `main.tsx` calls it once, so
+StrictMode does not duplicate the automatic-lock listeners.
+
+Screens never import Dexie or a `CryptoKey`. They call `vault.setup` and `vault.unlock` with a PIN read
+from the DOM at submit time and cleared in `finally`. `ui/errors.ts` maps domain errors to i18n keys;
+screens never show `error.message`. Locking goes through `vault.lock()`, which clears the volatile
+state and advances the epoch so React unmounts the protected tree. Automatic lock and quick exit call
+that same method. Persistent storage is requested only after a successful setup or unlock.
+
+See `docs/adr/0006-ui-shell.md` for the shell decisions and `docs/threat-model.md` for the residual
+limits.
+
 ## Tests
 
 ```sh
