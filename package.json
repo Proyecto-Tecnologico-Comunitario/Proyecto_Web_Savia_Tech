@@ -18,7 +18,9 @@
     "format": "prettier --write .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "licenses": "node scripts/check-licenses.mjs"
+    "licenses": "node scripts/check-licenses.mjs",
+    "e2e": "npm run e2e --workspace @saviatech/web",
+    "e2e:install": "npx playwright install chromium"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

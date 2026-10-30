@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       '**/node_modules/**',
+      '.opencode/**',
       'docs/design/**',
       'playwright-report/**',
       'test-results/**',
@@ -29,6 +30,38 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2022,
       globals: globals.node,
+    },
+  },
+  {
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    rules: {
+      // La interfaz no puede filtrar datos sensibles ni PIN por la consola.
+      'no-console': 'error',
+      // La aleatoriedad debe salir solo de WebCrypto.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'Math',
+          property: 'random',
+          message: 'Use crypto.getRandomValues for randomness',
+        },
+      ],
+      // Solo `settings/settingsStore.ts` puede usar `localStorage`; nadie puede usar `sessionStorage`.
+      'no-restricted-globals': [
+        'error',
+        { name: 'localStorage', message: 'Use settingsStore for the two non-sensitive settings' },
+        { name: 'sessionStorage', message: 'Do not store data in sessionStorage' },
+      ],
+    },
+  },
+  {
+    files: ['apps/web/src/settings/settingsStore.ts'],
+    rules: {
+      // Excepción acotada: este módulo es el único que puede leer y escribir `localStorage`.
+      'no-restricted-globals': [
+        'error',
+        { name: 'sessionStorage', message: 'Do not store data in sessionStorage' },
+      ],
     },
   },
   {
