@@ -1,0 +1,62 @@
+{
+  "version": "sample-1",
+  "status": "SAMPLE",
+  "priorityBands": ["moderately-severe", "severe"],
+  "safetyProtocol": {
+    "es": [
+      "Muestra: confirme si la persona está en peligro inmediato y ofrezca un espacio privado para hablar.",
+      "Muestra: siga el protocolo local de seguridad y registre la decisión de la profesional."
+    ],
+    "en": [
+      "Sample: check whether the person is in immediate danger and offer a private space to talk.",
+      "Sample: follow the local safety protocol and record the professional's decision."
+    ]
+  },
+  "services": [
+    {
+      "id": "sample-legal",
+      "priority": false,
+      "type": "legal",
+      "name": {
+        "es": "Servicio de muestra B",
+        "en": "Sample service B"
+      },
+      "contact": "000-000-0000",
+      "hours": {
+        "es": "Lunes a viernes, 8:00 a 17:00 (muestra)",
+        "en": "Monday to Friday, 8:00 to 17:00 (sample)"
+      },
+      "lastVerified": "SAMPLE-DD-MM-AAAA"
+    },
+    {
+      "id": "sample-priority",
+      "priority": true,
+      "type": "health",
+      "name": {
+        "es": "Servicio de muestra A (prioritario)",
+        "en": "Sample service A (priority)"
+      },
+      "contact": "000-000-0000",
+      "hours": {
+        "es": "24 horas (muestra)",
+        "en": "24 hours (sample)"
+      },
+      "lastVerified": "SAMPLE-DD-MM-AAAA"
+    },
+    {
+      "id": "sample-psychosocial",
+      "priority": false,
+      "type": "psychosocial",
+      "name": {
+        "es": "Servicio de muestra C",
+        "en": "Sample service C"
+      },
+      "contact": "000-000-0000",
+      "hours": {
+        "es": "Lunes a viernes, 9:00 a 16:00 (muestra)",
+        "en": "Monday to Friday, 9:00 to 16:00 (sample)"
+      },
+      "lastVerified": "SAMPLE-DD-MM-AAAA"
+    }
+  ]
+}

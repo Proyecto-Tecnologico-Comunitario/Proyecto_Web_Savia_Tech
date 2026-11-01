@@ -1,0 +1,34 @@
+{
+  "version": "sample-1",
+  "status": "SAMPLE",
+  "languages": {
+    "es": {
+      "summary": [
+        "Este texto es una muestra y debe revisarlo Trabajo Social antes de usarse.",
+        "La información del caso se guarda cifrada en este dispositivo.",
+        "Puede detener la conversación en cualquier momento."
+      ],
+      "full": [
+        "Esta es una versión de muestra del consentimiento. No es un texto legal definitivo y no debe usarse con personas reales sin revisión de Trabajo Social.",
+        "Le explico que usaré una herramienta para registrar respuestas sobre su bienestar y orientar la remisión a servicios locales. La herramienta no emite diagnósticos.",
+        "Las respuestas se guardan cifradas en este dispositivo. No se envían a internet ni a terceros.",
+        "Usted decide qué responder. Puede omitir preguntas o detener la conversación en cualquier momento."
+      ],
+      "checkbox": "Entiendo la información y acepto continuar."
+    },
+    "en": {
+      "summary": [
+        "This text is a sample and must be reviewed by Social Work before use.",
+        "Case information is stored encrypted on this device.",
+        "You can stop the conversation at any time."
+      ],
+      "full": [
+        "This is a sample version of the consent text. It is not a final legal text and must not be used with real people without Social Work review.",
+        "I will use a tool to record answers about your wellbeing and to guide referral to local services. The tool does not provide diagnoses.",
+        "Answers are stored encrypted on this device. They are not sent to the internet or to third parties.",
+        "You decide what to answer. You can skip questions or stop the conversation at any time."
+      ],
+      "checkbox": "I understand the information and agree to continue."
+    }
+  }
+}
