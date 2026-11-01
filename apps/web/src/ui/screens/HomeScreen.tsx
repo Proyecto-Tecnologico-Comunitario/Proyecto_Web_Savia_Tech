@@ -12,10 +12,12 @@ import { CaseListScreen } from './CaseListScreen';
 interface HomeScreenProps {
   /** Estado de la persistencia solicitada tras desbloquear. */
   readonly persistence: PersistenceStatus | null;
+  /** Abre el formulario de nuevo caso. */
+  readonly onNewCase: () => void;
 }
 
 /** Pantalla de inicio con el aviso de muestra y la lista de casos. */
-export function HomeScreen({ persistence }: HomeScreenProps) {
+export function HomeScreen({ persistence, onNewCase }: HomeScreenProps) {
   const { t } = useI18n();
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -31,7 +33,7 @@ export function HomeScreen({ persistence }: HomeScreenProps) {
       </h1>
       <SampleBanner />
       <PersistenceWarning status={persistence} />
-      <CaseListScreen />
+      <CaseListScreen onNewCase={onNewCase} />
     </main>
   );
 }

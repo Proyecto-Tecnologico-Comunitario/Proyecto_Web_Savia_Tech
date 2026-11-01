@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { useApp } from '../app/AppContext';
-import { HOME_ROUTE, SETTINGS_ROUTE } from '../router/routes';
+import { HOME_ROUTE, NEW_CASE_ROUTE, screeningRoute, SETTINGS_ROUTE } from '../router/routes';
 import { startAutoLock, type AutoLock } from '../session/autoLock';
 import { requestPersistentStorage, type PersistenceStatus } from '../storage';
 import { Header } from './components/Header';
 import { FatalErrorScreen } from './screens/FatalErrorScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { NeutralScreen } from './screens/NeutralScreen';
+import { NewCaseScreen } from './screens/NewCaseScreen';
 import { PinSetupScreen } from './screens/PinSetupScreen';
 import { PinUnlockScreen } from './screens/PinUnlockScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -108,6 +109,19 @@ export function Shell() {
     app.router.navigate(SETTINGS_ROUTE);
   }, [app.router]);
 
+  /** Abre el formulario de nuevo caso. */
+  const openNewCase = useCallback(() => {
+    app.router.navigate(NEW_CASE_ROUTE);
+  }, [app.router]);
+
+  /** Sustituye el formulario por el tamizaje del caso recién creado. */
+  const startScreening = useCallback(
+    (caseId: string) => {
+      app.router.replace(screeningRoute(caseId));
+    },
+    [app.router],
+  );
+
   /** Vuelve al inicio o a la pantalla anterior. */
   const goBack = useCallback(() => {
     if (app.router.getSnapshot().canGoBack) {
@@ -168,15 +182,17 @@ export function Shell() {
         showSettings={routerSnapshot.route.name !== 'settings'}
       />
       {routerSnapshot.route.name === 'home' ? (
-        <HomeScreen persistence={persistence} />
-      ) : (
+        <HomeScreen persistence={persistence} onNewCase={openNewCase} />
+      ) : routerSnapshot.route.name === 'new-case' ? (
+        <NewCaseScreen onBack={goBack} onCreated={startScreening} />
+      ) : routerSnapshot.route.name === 'settings' ? (
         <SettingsScreen
           settings={app.settings}
           persistence={persistence}
           onAutoLockChange={changeAutoLock}
           onBack={goBack}
         />
-      )}
+      ) : null}
     </div>
   );
 }

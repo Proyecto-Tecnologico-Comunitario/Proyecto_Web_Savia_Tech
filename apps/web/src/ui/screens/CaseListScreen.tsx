@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useApp } from '../../app/AppContext';
+import { CONTENT_RESULT } from '../../content';
 import { VaultLockedError } from '../../crypto/errors';
 import { useI18n } from '../../i18n/I18nProvider';
 import type { CaseRecord } from '../../model/case';
@@ -13,15 +14,24 @@ const PAGE_SIZE = 20;
 /** Estado de la carga inicial de la lista. */
 type LoadStatus = 'loading' | 'ready' | 'error';
 
+/** Propiedades de la lista de casos. */
+interface CaseListScreenProps {
+  /** Abre el formulario de nuevo caso. */
+  readonly onNewCase: () => void;
+}
+
 /**
  * Lista paginada de casos.
  *
  * Solo muestra el código seudónimo y la fecha de actualización. El contenido clínico se lee al abrir
  * el detalle, nunca se vuelca en la lista. Los casos ilegibles se cuentan pero no se muestran.
  */
-export function CaseListScreen() {
+export function CaseListScreen({ onNewCase }: CaseListScreenProps) {
   const app = useApp();
   const { locale, t } = useI18n();
+
+  // Sin contenido válido no se puede iniciar un caso.
+  const contentAvailable = CONTENT_RESULT.ok;
 
   const [items, setItems] = useState<readonly CaseRecord[]>([]);
   const [total, setTotal] = useState<number | null>(null);
@@ -127,6 +137,22 @@ export function CaseListScreen() {
   return (
     <section className="case-section" aria-labelledby="cases-title">
       <h2 id="cases-title">{t('cases.title')}</h2>
+
+      {contentAvailable ? null : (
+        <p id="cases-content-error" className="error" role="alert">
+          {t('cases.contentError')}
+        </p>
+      )}
+
+      <button
+        type="button"
+        className="button button-primary"
+        disabled={!contentAvailable}
+        aria-describedby={contentAvailable ? undefined : 'cases-content-error'}
+        onClick={onNewCase}
+      >
+        {t('cases.new')}
+      </button>
 
       {status === 'loading' ? <p role="status">{t('cases.loading')}</p> : null}
 
