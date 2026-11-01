@@ -41,7 +41,8 @@ export type ScreeningAction =
   | { readonly type: 'acknowledgeAlert' }
   | { readonly type: 'setFinalBand'; readonly bandId: string }
   | { readonly type: 'setJustification'; readonly text: string }
-  | { readonly type: 'save' };
+  | { readonly type: 'save' }
+  | { readonly type: 'reset' };
 
 /** Estado inicial con una casilla vacía por ítem. */
 export function initialScreeningState(instrument: Instrument): ScreeningState {
@@ -178,6 +179,11 @@ export function reduceScreening(
       }
 
       return { ...state, step: 'saved' };
+    }
+
+    case 'reset': {
+      // Se descarta todo el estado en curso al bloquear o salir.
+      return initialScreeningState(instrument);
     }
 
     default: {

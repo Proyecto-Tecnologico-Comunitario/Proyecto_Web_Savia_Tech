@@ -13,6 +13,7 @@ import { NeutralScreen } from './screens/NeutralScreen';
 import { NewCaseScreen } from './screens/NewCaseScreen';
 import { PinSetupScreen } from './screens/PinSetupScreen';
 import { PinUnlockScreen } from './screens/PinUnlockScreen';
+import { ScreeningScreen } from './screens/ScreeningScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { StartupScreen } from './screens/StartupScreen';
 
@@ -122,6 +123,11 @@ export function Shell() {
     [app.router],
   );
 
+  /** Vuelve a la lista tras guardar el tamizaje; el detalle llega en el paso siguiente. */
+  const finishScreening = useCallback(() => {
+    app.router.replace(HOME_ROUTE);
+  }, [app.router]);
+
   /** Vuelve al inicio o a la pantalla anterior. */
   const goBack = useCallback(() => {
     if (app.router.getSnapshot().canGoBack) {
@@ -185,6 +191,12 @@ export function Shell() {
         <HomeScreen persistence={persistence} onNewCase={openNewCase} />
       ) : routerSnapshot.route.name === 'new-case' ? (
         <NewCaseScreen onBack={goBack} onCreated={startScreening} />
+      ) : routerSnapshot.route.name === 'screening' ? (
+        <ScreeningScreen
+          caseId={routerSnapshot.route.caseId}
+          onBack={goBack}
+          onSaved={finishScreening}
+        />
       ) : routerSnapshot.route.name === 'settings' ? (
         <SettingsScreen
           settings={app.settings}

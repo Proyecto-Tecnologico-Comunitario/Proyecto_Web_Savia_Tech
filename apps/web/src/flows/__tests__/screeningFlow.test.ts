@@ -57,6 +57,19 @@ describe('screening flow', () => {
     expect(state.finalBand).toBeNull();
   });
 
+  it('discards answers and decisions on reset', () => {
+    // El bloqueo limpia todo el estado en curso.
+    const instrument = sampleInstrument();
+    const answered = reduceScreening(instrument, initialScreeningState(instrument), {
+      type: 'answer',
+      value: 2,
+    });
+    const reset = reduceScreening(instrument, answered, { type: 'reset' });
+
+    expect(reset).toEqual(initialScreeningState(instrument));
+    expect(reset.answers.every((answer) => answer === null)).toBe(true);
+  });
+
   it('accepts only option values and records the answer at the visible index', () => {
     const instrument = sampleInstrument();
     const state = initialScreeningState(instrument);

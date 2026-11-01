@@ -80,13 +80,18 @@
   gap: var(--space-1);
 }
 
-.field input {
+.field input,
+.field textarea {
   min-height: var(--tap-target);
   padding: var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-bg);
   color: var(--color-text);
+}
+
+.field textarea {
+  resize: vertical;
 }
 
 .hint {
@@ -221,4 +226,46 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-block-start: var(--space-3);
+}
+
+.screening-header {
+  display: grid;
+  gap: var(--space-1);
+  margin-block-end: var(--space-3);
+}
+
+.screening-header h1 {
+  margin-block-end: var(--space-1);
+}
+
+.sample-label {
+  display: inline-block;
+  justify-self: start;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.safety-alert {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius);
+}
+
+.safety-alert ul,
+.result-answers {
+  margin: 0;
+  padding-inline-start: var(--space-4);
+}
+
+.safety-alert li,
+.result-answers li {
+  margin-block-end: var(--space-2);
 }
