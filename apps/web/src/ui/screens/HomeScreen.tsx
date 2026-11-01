@@ -5,14 +5,16 @@ import { useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n/I18nProvider';
 import type { PersistenceStatus } from '../../storage';
 import { PersistenceWarning } from '../components/PersistenceWarning';
+import { SampleBanner } from '../components/SampleBanner';
+import { CaseListScreen } from './CaseListScreen';
 
-/** Propiedades de la pantalla de inicio provisional. */
+/** Propiedades de la pantalla de inicio. */
 interface HomeScreenProps {
   /** Estado de la persistencia solicitada tras desbloquear. */
   readonly persistence: PersistenceStatus | null;
 }
 
-/** Pantalla provisional de inicio; T6 añadirá la lista de casos. */
+/** Pantalla de inicio con el aviso de muestra y la lista de casos. */
 export function HomeScreen({ persistence }: HomeScreenProps) {
   const { t } = useI18n();
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -27,8 +29,9 @@ export function HomeScreen({ persistence }: HomeScreenProps) {
       <h1 ref={headingRef} tabIndex={-1}>
         {t('home.title')}
       </h1>
-      <p>{t('home.placeholder')}</p>
+      <SampleBanner />
       <PersistenceWarning status={persistence} />
+      <CaseListScreen />
     </main>
   );
 }

@@ -20,6 +20,13 @@ export interface Router {
   getSnapshot(): RouterSnapshot;
   /** Apila una ruta; repetir la ruta actual no hace nada. */
   navigate(route: Route): void;
+  /**
+   * Sustituye la ruta superior sin apilar otra entrada.
+   *
+   * Si la ruta nueva coincide con la anterior de la pila, se descarta la entrada antigua para no
+   * dejar dos pantallas iguales seguidas (por ejemplo, detalle → tamizaje → detalle).
+   */
+  replace(route: Route): void;
   /** Retrocede una entrada si es posible. */
   back(): void;
   /** Vuelve al inicio y a la vista de la app; se usa al bloquear. */
@@ -28,6 +35,26 @@ export interface Router {
   showNeutral(): void;
   /** Vuelve de la pantalla neutral a la app. */
   leaveNeutral(): void;
+}
+
+/**
+ * Compara dos rutas por identidad funcional.
+ *
+ * El nombre por sí solo no basta: dos casos distintos comparten la ruta `case-detail` y deben
+ * considerarse pantallas diferentes.
+ */
+function sameRoute(left: Route, right: Route): boolean {
+  // El nombre distingue la pantalla.
+  if (left.name !== right.name) {
+    return false;
+  }
+
+  // Solo las rutas de caso llevan identificador; el resto no tiene más campos que comparar.
+  if (left.name === 'case-detail' || left.name === 'screening' || left.name === 'referral') {
+    return right.name === left.name && left.caseId === right.caseId;
+  }
+
+  return true;
 }
 
 /** Crea un router en memoria con pila de navegación. */
@@ -58,10 +85,10 @@ export function createRouter(): Router {
   function publish(): void {
     const next = makeSnapshot();
 
-    // Se comparan por nombre de ruta para no notificar por objetos equivalentes.
+    // Se comparan por identidad funcional para no notificar por objetos equivalentes.
     if (
       next.view === snapshot.view &&
-      next.route.name === snapshot.route.name &&
+      sameRoute(next.route, snapshot.route) &&
       next.canGoBack === snapshot.canGoBack
     ) {
       return;
@@ -98,11 +125,32 @@ export function createRouter(): Router {
       }
 
       // Navegar a la ruta actual no apila una entrada duplicada.
-      if (currentRoute().name === route.name) {
+      if (sameRoute(currentRoute(), route)) {
         return;
       }
 
       stack = [...stack, route];
+      publish();
+    },
+
+    replace(route) {
+      // La pantalla neutral tampoco se sustituye.
+      if (view !== 'app') {
+        return;
+      }
+
+      // Sustituir por la misma ruta no cambia nada.
+      if (sameRoute(currentRoute(), route)) {
+        return;
+      }
+
+      // La entrada superior se reemplaza en lugar de apilarse.
+      const nextStack = [...stack.slice(0, -1), route];
+      const previous = nextStack[nextStack.length - 2];
+
+      // Evitar dos pantallas iguales seguidas al volver al detalle desde el tamizaje.
+      stack =
+        previous !== undefined && sameRoute(previous, route) ? nextStack.slice(0, -1) : nextStack;
       publish();
     },
 
