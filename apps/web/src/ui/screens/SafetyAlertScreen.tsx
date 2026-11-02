@@ -31,7 +31,7 @@ export function SafetyAlertScreen({ lines, onAcknowledge }: SafetyAlertScreenPro
     <section className="safety-alert" aria-labelledby="safety-alert-title">
       <div role="alert">
         <h2 id="safety-alert-title" ref={headingRef} tabIndex={-1}>
-          {t('alert.title')}
+          {t('safety.title')}
         </h2>
         <ul>
           {lines.map((line) => (
@@ -41,7 +41,7 @@ export function SafetyAlertScreen({ lines, onAcknowledge }: SafetyAlertScreenPro
       </div>
 
       <button type="button" className="button button-primary" onClick={onAcknowledge}>
-        {t('alert.acknowledge')}
+        {t('safety.acknowledge')}
       </button>
     </section>
   );

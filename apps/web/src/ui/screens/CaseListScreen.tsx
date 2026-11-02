@@ -18,6 +18,8 @@ type LoadStatus = 'loading' | 'ready' | 'error';
 interface CaseListScreenProps {
   /** Abre el formulario de nuevo caso. */
   readonly onNewCase: () => void;
+  /** Abre el detalle de un caso por su identificador aleatorio. */
+  readonly onOpenCase: (caseId: string) => void;
 }
 
 /**
@@ -26,7 +28,7 @@ interface CaseListScreenProps {
  * Solo muestra el código seudónimo y la fecha de actualización. El contenido clínico se lee al abrir
  * el detalle, nunca se vuelca en la lista. Los casos ilegibles se cuentan pero no se muestran.
  */
-export function CaseListScreen({ onNewCase }: CaseListScreenProps) {
+export function CaseListScreen({ onNewCase, onOpenCase }: CaseListScreenProps) {
   const app = useApp();
   const { locale, t } = useI18n();
 
@@ -187,6 +189,16 @@ export function CaseListScreen({ onNewCase }: CaseListScreenProps) {
               <p className="hint">
                 {t('cases.updatedAt', { date: dateFormatter.format(item.updatedAt) })}
               </p>
+              <button
+                type="button"
+                className="button button-secondary"
+                aria-label={t('cases.openCase', { code: item.code })}
+                onClick={() => {
+                  onOpenCase(item.id);
+                }}
+              >
+                {t('cases.open')}
+              </button>
             </li>
           ))}
         </ul>

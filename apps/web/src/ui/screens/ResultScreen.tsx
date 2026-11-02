@@ -5,22 +5,8 @@ import { useEffect, useRef } from 'react';
 import type { Instrument } from '@saviatech/rules';
 
 import { canSaveScreening, type ScreeningState } from '../../flows/screeningFlow';
-import type { MessageKey } from '../../i18n';
 import { useI18n } from '../../i18n/I18nProvider';
-
-/**
- * Traducciones de las bandas de muestra.
- *
- * Las claves deben escribirse literales para que la prueba de i18n detecte su uso. Una banda
- * desconocida se muestra con su identificador en lugar de ocultarse.
- */
-const BAND_KEYS: Readonly<Record<string, MessageKey>> = {
-  minimal: 'band.minimal',
-  mild: 'band.mild',
-  moderate: 'band.moderate',
-  'moderately-severe': 'band.moderatelySevere',
-  severe: 'band.severe',
-};
+import { bandLabel } from '../bandLabels';
 
 /** Propiedades de la pantalla de resultado. */
 interface ResultScreenProps {
@@ -76,12 +62,6 @@ export function ResultScreen({
   const changed = finalBand !== evaluation.bandId;
   const justificationMissing = changed && state.justification.trim() === '';
 
-  /** Traduce una banda o devuelve su identificador si es desconocida. */
-  const bandLabel = (bandId: string): string => {
-    const key = BAND_KEYS[bandId];
-    return key === undefined ? bandId : t(key);
-  };
-
   // Solo se listan las respuestas de valor 2 o más, con el texto del ítem.
   const relevantAnswers = state.answers.flatMap((answer, index) => {
     if (answer === null || answer < 2) {
@@ -103,7 +83,7 @@ export function ResultScreen({
       </h2>
 
       <p>{t('screening.score', { score: evaluation.score, max: maxScore })}</p>
-      <p>{t('screening.band', { band: bandLabel(evaluation.bandId) })}</p>
+      <p>{t('screening.band', { band: bandLabel(evaluation.bandId, t) })}</p>
 
       <h3>{t('screening.weightTitle')}</h3>
       {relevantAnswers.length === 0 ? (
@@ -132,7 +112,7 @@ export function ResultScreen({
         >
           {instrument.bands.map((band) => (
             <option key={band.id} value={band.id}>
-              {bandLabel(band.id)}
+              {bandLabel(band.id, t)}
             </option>
           ))}
         </select>

@@ -3,16 +3,25 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { useApp } from '../app/AppContext';
-import { HOME_ROUTE, NEW_CASE_ROUTE, screeningRoute, SETTINGS_ROUTE } from '../router/routes';
+import {
+  caseDetailRoute,
+  HOME_ROUTE,
+  NEW_CASE_ROUTE,
+  referralRoute,
+  screeningRoute,
+  SETTINGS_ROUTE,
+} from '../router/routes';
 import { startAutoLock, type AutoLock } from '../session/autoLock';
 import { requestPersistentStorage, type PersistenceStatus } from '../storage';
 import { Header } from './components/Header';
+import { CaseDetailScreen } from './screens/CaseDetailScreen';
 import { FatalErrorScreen } from './screens/FatalErrorScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { NeutralScreen } from './screens/NeutralScreen';
 import { NewCaseScreen } from './screens/NewCaseScreen';
 import { PinSetupScreen } from './screens/PinSetupScreen';
 import { PinUnlockScreen } from './screens/PinUnlockScreen';
+import { ReferralScreen } from './screens/ReferralScreen';
 import { ScreeningScreen } from './screens/ScreeningScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { StartupScreen } from './screens/StartupScreen';
@@ -123,9 +132,44 @@ export function Shell() {
     [app.router],
   );
 
-  /** Vuelve a la lista tras guardar el tamizaje; el detalle llega en el paso siguiente. */
-  const finishScreening = useCallback(() => {
-    app.router.replace(HOME_ROUTE);
+  /** Abre el detalle de un caso. */
+  const openCase = useCallback(
+    (caseId: string) => {
+      app.router.navigate(caseDetailRoute(caseId));
+    },
+    [app.router],
+  );
+
+  /** Abre un tamizaje desde el detalle sin perder el historial de la pantalla. */
+  const openCurrentScreening = useCallback(() => {
+    const route = app.router.getSnapshot().route;
+    if (route.name === 'case-detail') {
+      app.router.navigate(screeningRoute(route.caseId));
+    }
+  }, [app.router]);
+
+  /** Abre la ruta de remisión del caso abierto. */
+  const openCurrentReferral = useCallback(() => {
+    const route = app.router.getSnapshot().route;
+    if (route.name === 'case-detail') {
+      app.router.navigate(referralRoute(route.caseId));
+    }
+  }, [app.router]);
+
+  /** Sustituye el tamizaje por el detalle del caso ya guardado. */
+  const finishScreening = useCallback(
+    (caseId: string) => {
+      app.router.replace(caseDetailRoute(caseId));
+    },
+    [app.router],
+  );
+
+  /** Sale del tamizaje hacia el detalle, sin dejar la sesión en el historial. */
+  const leaveCurrentScreening = useCallback(() => {
+    const route = app.router.getSnapshot().route;
+    if (route.name === 'screening') {
+      app.router.replace(caseDetailRoute(route.caseId));
+    }
   }, [app.router]);
 
   /** Vuelve al inicio o a la pantalla anterior. */
@@ -188,15 +232,24 @@ export function Shell() {
         showSettings={routerSnapshot.route.name !== 'settings'}
       />
       {routerSnapshot.route.name === 'home' ? (
-        <HomeScreen persistence={persistence} onNewCase={openNewCase} />
+        <HomeScreen persistence={persistence} onNewCase={openNewCase} onOpenCase={openCase} />
       ) : routerSnapshot.route.name === 'new-case' ? (
         <NewCaseScreen onBack={goBack} onCreated={startScreening} />
+      ) : routerSnapshot.route.name === 'case-detail' ? (
+        <CaseDetailScreen
+          caseId={routerSnapshot.route.caseId}
+          onBack={goBack}
+          onNewScreening={openCurrentScreening}
+          onReferral={openCurrentReferral}
+        />
       ) : routerSnapshot.route.name === 'screening' ? (
         <ScreeningScreen
           caseId={routerSnapshot.route.caseId}
-          onBack={goBack}
+          onBack={leaveCurrentScreening}
           onSaved={finishScreening}
         />
+      ) : routerSnapshot.route.name === 'referral' ? (
+        <ReferralScreen caseId={routerSnapshot.route.caseId} onBack={goBack} />
       ) : routerSnapshot.route.name === 'settings' ? (
         <SettingsScreen
           settings={app.settings}
