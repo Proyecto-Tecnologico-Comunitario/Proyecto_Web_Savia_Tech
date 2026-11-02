@@ -1,6 +1,6 @@
 # Threat model (initial)
 
-- Status: draft, updated in TR-001 tasks T3, T4 and T5. Needs review in T8.
+- Status: draft, updated in TR-001 tasks T3, T4, T5 and T6. Needs review in T8.
 - System: offline-first PWA for pseudonymous psychosocial screening by frontline professionals.
 - Data: pseudonymous case code, consent record, screening answers, scores, professional decision and
   referral pathway. No names or direct identifiers are required in v1.
@@ -85,6 +85,30 @@
   and a static test forbid it elsewhere.
 - Persistent storage is requested after a successful setup or unlock, never at import time.
 
+## Implemented case-flow controls (T6)
+
+- Consent is mandatory before `repository.create`; the checkbox and the continue button stay disabled
+  until it is accepted.
+- Screening answers, the safety alert step, the final band and the justification live only in React
+  state and are registered with `volatileState`, so a lock or quick exit clears them. Nothing is
+  written until the professional confirms the result.
+- A screening is written once with `repository.update`; the repository still rejects a changed final
+  band without a non-blank justification. The UI also disables saving until the justification exists.
+- Asynchronous repository results compare the vault epoch captured before the request and are dropped
+  after a lock. Mounted flags prevent navigation after unmount.
+- The safety alert uses `role="alert"` and has one exit button. It cannot be dismissed with Escape or a
+  click outside.
+- The result shows the score, the calculated band, the answers of value 2 or more, and an explicit
+  note that the tool does not diagnose. The final band is the professional's decision.
+- The referral route uses the last screening's final band or `safetyAlert` and the `priorityBands`
+  declared in `content/referral/`. Referrals are not stored.
+- Clinical content is validated at startup. Invalid content blocks case creation and screening with a
+  generic translated message instead of exposing validation paths.
+- Case ids remain in memory only; the URL never contains a route or a case id.
+- Tests cover the full flow with and without alert, justification enforcement, lock mid-screening,
+  quick exit from the result, language switching without losing answers, and CSP/console/network
+  checks on every new screen.
+
 ## Known limitations
 
 - A PIN-derived key can be brute-forced offline if an attacker copies storage. The iteration count
@@ -105,6 +129,15 @@
 - There is no anti-rollback protection. An attacker who can write IndexedDB can restore an older
   ciphertext for the same table, id and version, and it will decrypt. A later task needs an
   authenticated sequence or a server-side check if rollback matters for clinical decisions.
+- v1 has no age, minor status, territory or consent revocation. It cannot detect that the person is a
+  minor, and it cannot delete a case or revoke consent. Only synthetic data is acceptable until the
+  minors protocol, the data-protection review and a deletion policy exist.
+- A lock or quick exit during screening discards the answers by design. Pausing and resuming an
+  encrypted session is TR-002.
+- The safety alert appears only after the last question. A professional who stops before the end does
+  not see the protocol. Showing it as soon as the safety item is answered needs Social Work review.
+- The referral screen suggests a sample route and records nothing. It does not track whether a referral
+  was agreed, sent or confirmed, and the sample contacts must be replaced before any pilot.
 - Forgetting the PIN makes local data unrecoverable in v1.
 - CSS `:visited`-style history leaks and browser autofill are outside our control; the app must not put
   case data in URLs or form fields that persist.

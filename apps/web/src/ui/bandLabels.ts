@@ -15,7 +15,7 @@ const BAND_KEYS: Readonly<Record<string, MessageKey>> = {
   minimal: 'band.minimal',
   mild: 'band.mild',
   moderate: 'band.moderate',
-  'moderately-severe': 'band.moderatelySevere',
+  'moderately-severe': 'band.moderately-severe',
   severe: 'band.severe',
 };
 

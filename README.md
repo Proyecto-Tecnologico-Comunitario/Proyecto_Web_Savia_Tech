@@ -7,11 +7,11 @@ pathways. The professional makes every decision; the tool never diagnoses.
 This repository contains the **frontend only**. A backend, if needed, lives in a separate repository
 and is not part of v1. See `docs/specs/TR-001-vertical-slice.md` for the current scope.
 
-> Status: rules engine, local encryption, encrypted case storage and the UI shell (TR-001 tasks T2-T5).
-> Instrument validation, scoring, bands, the safety alert, PIN-derived keys, encrypted records, the
-> case repository, PIN setup/unlock, automatic lock, quick exit, Spanish/English text and settings exist
-> with tests. Case flows and the PWA offline flow are implemented in later tasks. Nothing in this
-> repository is ready for real personal data.
+> Status: rules engine, local encryption, encrypted case storage, the UI shell and the case flows
+> (TR-001 tasks T2-T6). Instrument validation, scoring, bands, the safety alert, PIN-derived keys,
+> encrypted records, the case repository, PIN setup/unlock, automatic lock, quick exit, Spanish/English
+> text, settings, consent, screening, result, case detail and the suggested referral route exist with
+> tests. The PWA offline flow is T7. Nothing in this repository is ready for real personal data.
 
 ## Requirements
 
@@ -25,8 +25,9 @@ npm ci
 npm run dev
 ```
 
-The development server prints a local URL. The app currently offers PIN setup/unlock, a provisional
-home screen and settings; the case flows arrive in T6.
+The development server prints a local URL. The app offers PIN setup/unlock, a case list, new case with
+layered consent, screening, safety alert, result, case detail, a suggested referral route and settings.
+All content is synthetic and marked `SAMPLE`.
 
 ## Commands
 
@@ -41,8 +42,9 @@ npm run licenses   # fail on missing or non-permissive dependency licences
 npm run format     # write Prettier formatting
 ```
 
-`npm run e2e` covers the T5 lock and quick-exit flows. The PWA offline flow arrives in TR-001 task T7.
-Install Chromium once with `npm run e2e:install`.
+`npm run e2e` covers the T5 lock and quick-exit flows and the T6 case flows (with and without a safety
+alert, justification, lock mid-screening, quick exit, language switching and CSP). The PWA offline flow
+arrives in TR-001 task T7. Install Chromium once with `npm run e2e:install`.
 
 ## Repository layout
 
@@ -52,9 +54,11 @@ apps/web/src/crypto/   PIN-derived key hierarchy and record encryption
 apps/web/src/model/    case payload types and runtime validation
 apps/web/src/storage/  Dexie database, encrypted case repository and persistence helpers
 apps/web/src/session/  vault controller, automatic lock, quick exit and volatile state
+apps/web/src/content/  startup validation of instrument, consent and referral files
+apps/web/src/flows/    pure reducers for new case, screening and screening entry
 apps/web/src/router/   in-memory router
 apps/web/src/ui/       shell, screens and accessible components
-apps/web/e2e/          Playwright lock, quick-exit, i18n, settings and CSP tests
+apps/web/e2e/          Playwright lock, quick-exit, case-flow, i18n, settings and CSP tests
 packages/rules/        pure TypeScript validation, scoring and safety rules
 content/               versioned clinical content (SAMPLE data only)
 docs/                  specifications, design reference, threat model, ADRs
@@ -73,7 +77,8 @@ each case row exposes only `id`, `v`, `iv`, `ct` and `actualizadoEn`. Read
 `docs/adr/0005-case-storage.md` before changing the repository or the schema.
 
 The UI shell, in-memory router, automatic lock, quick exit and settings decisions are recorded in
-`docs/adr/0006-ui-shell.md`.
+`docs/adr/0006-ui-shell.md`. The consent, screening, result, case-detail and referral decisions are
+recorded in `docs/adr/0007-case-flows.md`.
 
 Code comments and JSDoc are in Spanish for the security audit. Repository documentation, identifiers,
 error messages and test names are in English. See `docs/adr/0004-language-conventions.md`.

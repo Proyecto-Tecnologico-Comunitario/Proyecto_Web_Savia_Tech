@@ -90,6 +90,21 @@ describe('i18n messages', () => {
     }
   });
 
+  it('never presents the tool as a diagnosis', () => {
+    // La herramienta apoya decisiones; solo la nota de no diagnóstico puede nombrarlo.
+    const forbidden = /diagn[oó]stic[oa]s?|diagnosis/i;
+
+    for (const [locale, messages] of Object.entries({ es, en })) {
+      for (const [key, value] of Object.entries(messages)) {
+        if (key === 'result.notDiagnosis') {
+          continue;
+        }
+
+        expect(value, `${locale}.${key} must not claim a diagnosis`).not.toMatch(forbidden);
+      }
+    }
+  });
+
   it('uses every key in production source and references no missing key', async () => {
     // Se lee el código de producción, sin pruebas, para comprobar el uso real de las claves.
     const source = await readSource();

@@ -6,6 +6,8 @@ import { describe, expect, it } from 'vitest';
 import consentFile from '../../../../../content/consent/consent.sample.json';
 import instrumentFile from '../../../../../content/instruments/phq9.sample.json';
 import referralFile from '../../../../../content/referral/referral.sample.json';
+import en from '../../i18n/en.json';
+import es from '../../i18n/es.json';
 import { CONTENT_RESULT, loadContentFrom, type AppContent, type ContentResult } from '..';
 import { validateConsent } from '../consent';
 import { validateReferral } from '../referral';
@@ -102,6 +104,18 @@ describe('sample content', () => {
     // Toda banda prioritaria debe existir en el instrumento, como exige el contenido clínico.
     for (const bandId of content.referral.priorityBands) {
       expect(content.instrument.bands.map((band) => band.id)).toContain(bandId);
+    }
+  });
+
+  it('has a translated label for every instrument band', () => {
+    // El resultado y el detalle usan `band.<id>`; una banda sin texto mostraría su identificador.
+    const content = expectOk(CONTENT_RESULT);
+
+    for (const band of content.instrument.bands) {
+      const key = `band.${band.id}`;
+
+      expect(Object.keys(es), `missing es.${key}`).toContain(key);
+      expect(Object.keys(en), `missing en.${key}`).toContain(key);
     }
   });
 

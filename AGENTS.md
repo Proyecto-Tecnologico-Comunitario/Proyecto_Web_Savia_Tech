@@ -44,9 +44,11 @@ packages/rules/    pure TypeScript engine: scoring, bands, safety alerts (no DOM
 apps/web/          the PWA (React + Vite)
 apps/web/src/crypto/  PIN-derived key hierarchy, wrapped data key and record encryption
 apps/web/src/session/ vault controller, automatic lock, quick exit and volatile state
+apps/web/src/content/ startup validation of instrument, consent and referral files
+apps/web/src/flows/   pure reducers for new case, screening and screening entry
 apps/web/src/router/  in-memory router
 apps/web/src/ui/      shell, screens and accessible components
-apps/web/e2e/         Playwright lock, quick-exit, i18n, settings and CSP tests
+apps/web/e2e/         Playwright lock, quick-exit, case-flow, i18n, settings and CSP tests
 .github/workflows/ci.yml
 ```
 
@@ -58,7 +60,7 @@ npm run dev       start the web app
 npm run lint      eslint + prettier check
 npm run typecheck tsc --noEmit for all workspaces
 npm test          unit tests (vitest)
-npm run e2e       end-to-end tests (playwright; lock and quick-exit from T5, offline flow from T7)
+npm run e2e       end-to-end tests (playwright; lock, quick-exit and case flows; offline flow from T7)
 npm run build     production build
 npm run licenses  fail on non-permissive dependency licences
 ```
