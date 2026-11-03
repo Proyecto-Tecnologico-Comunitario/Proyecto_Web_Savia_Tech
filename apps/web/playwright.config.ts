@@ -7,6 +7,8 @@ const BASE_URL = 'http://127.0.0.1:4173';
 
 export default defineConfig({
   testDir: './e2e',
+  // La medición de rendimiento es informativa y solo se ejecuta con `PERF=1`.
+  testIgnore: process.env.PERF === '1' ? [] : ['**/perf.spec.ts'],
   fullyParallel: false,
   forbidOnly: process.env.CI !== undefined,
   retries: process.env.CI === undefined ? 0 : 1,
