@@ -1,20 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { FormEvent } from 'react';
 
 import { PIN_MIN_LENGTH } from '../../crypto/constants';
 import type { MessageKey } from '../../i18n';
 import { useI18n } from '../../i18n/I18nProvider';
+import type { SwStatus } from '../../pwa/swStatus';
 import type { VaultController } from '../../session/vaultController';
 import { PinInput } from '../components/PinInput';
 import { SessionToolbar } from '../components/SessionToolbar';
+import { UpdateNotice } from '../components/UpdateNotice';
 import { describePinError } from '../errors';
 
 /** Propiedades de la pantalla de desbloqueo. */
 interface PinUnlockScreenProps {
   /** Controlador de la bóveda. */
   readonly vault: VaultController;
+  /** Estado del service worker, para avisar de una actualización pendiente. */
+  readonly swStatus: SwStatus;
   /** Acción síncrona de salida rápida. */
   readonly onQuickExit: () => void;
 }
@@ -38,8 +42,9 @@ function isValidPin(pin: string): boolean {
  * muestra cada segundo, pero el lector de pantalla solo anuncia el inicio (región `alert`) y el final
  * (región `polite` con la etiqueta del botón), no cada segundo.
  */
-export function PinUnlockScreen({ vault, onQuickExit }: PinUnlockScreenProps) {
+export function PinUnlockScreen({ vault, swStatus, onQuickExit }: PinUnlockScreenProps) {
   const { t } = useI18n();
+  const swState = useSyncExternalStore(swStatus.subscribe, swStatus.getState);
   const pinRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<PinMessage | null>(null);
@@ -145,6 +150,14 @@ export function PinUnlockScreen({ vault, onQuickExit }: PinUnlockScreenProps) {
       <SessionToolbar onQuickExit={onQuickExit} />
       <main id="main" className="screen screen-centered">
         <h1>{t('pin.unlock.title')}</h1>
+
+        <UpdateNotice
+          state={swState}
+          variant="unlock"
+          onApply={() => {
+            void swStatus.applyUpdate();
+          }}
+        />
 
         <form className="pin-form" onSubmit={handleSubmit} aria-busy={busy}>
           <PinInput id="pin" label={t('pin.label')} inputRef={pinRef} autoFocus />

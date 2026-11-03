@@ -117,5 +117,11 @@
   "settings.storage.usage": "{usage} MB used of {quota} MB",
   "neutral.title": "Notes",
   "neutral.empty": "No notes.",
-  "neutral.open": "Open"
+  "neutral.open": "Open",
+  "pwa.section": "App",
+  "pwa.update.title": "Update available",
+  "pwa.update.apply": "Update",
+  "pwa.update.onLock": "It will be applied when you lock",
+  "pwa.offlineReady": "Ready to use offline",
+  "pwa.offlineUnavailable": "Offline mode unavailable"
 }

@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { useI18n } from '../../i18n/I18nProvider';
 import type { Locale, MessageKey } from '../../i18n';
+import type { SwStatus } from '../../pwa/swStatus';
 import { AUTO_LOCK_OPTIONS_MS, type SettingsStore } from '../../settings/settingsStore';
 import { estimateStorage, type PersistenceStatus, type StorageEstimateResult } from '../../storage';
+import { OfflineReadyStatus } from '../components/OfflineReadyStatus';
+import { UpdateNotice } from '../components/UpdateNotice';
 
 /** Propiedades de la pantalla de ajustes. */
 interface SettingsScreenProps {
@@ -13,6 +16,8 @@ interface SettingsScreenProps {
   readonly settings: SettingsStore;
   /** Estado de la persistencia solicitada tras desbloquear. */
   readonly persistence: PersistenceStatus | null;
+  /** Estado del service worker, para avisar de una actualización pendiente. */
+  readonly swStatus: SwStatus;
   /** Guarda el nuevo plazo y reinicia el auto-lock. */
   readonly onAutoLockChange: (ms: number) => void;
   /** Vuelve a la pantalla anterior. */
@@ -29,10 +34,12 @@ function formatMegabytes(bytes: number): string {
 export function SettingsScreen({
   settings,
   persistence,
+  swStatus,
   onAutoLockChange,
   onBack,
 }: SettingsScreenProps) {
   const { locale, setLocale, t } = useI18n();
+  const swState = useSyncExternalStore(swStatus.subscribe, swStatus.getState);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   // El plazo se mantiene en estado local para reflejar el cambio de inmediato.
@@ -152,6 +159,12 @@ export function SettingsScreen({
             })}
           </p>
         )}
+      </section>
+
+      <section className="settings-group" aria-labelledby="pwa-title">
+        <h2 id="pwa-title">{t('pwa.section')}</h2>
+        <UpdateNotice state={swState} variant="settings" />
+        <OfflineReadyStatus state={swState} />
       </section>
     </main>
   );

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 import { useApp } from '../app/AppContext';
+import type { SwStatus } from '../pwa/swStatus';
 import {
   caseDetailRoute,
   HOME_ROUTE,
@@ -29,13 +30,19 @@ import { StartupScreen } from './screens/StartupScreen';
 /** Nombre de la app para el título del documento; se puede configurar en el despliegue. */
 const APP_NAME = import.meta.env.VITE_APP_NAME ?? 'SaviaTech';
 
+/** Propiedades de la compuerta de acceso. */
+interface ShellProps {
+  /** Estado del service worker, compartido por desbloqueo y Ajustes. */
+  readonly swStatus: SwStatus;
+}
+
 /**
  * Compuerta de acceso y composición de pantallas.
  *
  * El orden de evaluación es deliberado: la pantalla neutral gana incluso durante la carga, y ninguna
  * pantalla protegida se monta mientras la bóveda no esté desbloqueada.
  */
-export function Shell() {
+export function Shell({ swStatus }: ShellProps) {
   const app = useApp();
   const vaultSnapshot = useSyncExternalStore(app.vault.subscribe, app.vault.getSnapshot);
   const routerSnapshot = useSyncExternalStore(app.router.subscribe, app.router.getSnapshot);
@@ -219,7 +226,7 @@ export function Shell() {
 
   // 5. Con bóveda pero sin clave se pide el PIN.
   if (vaultSnapshot.state === 'locked') {
-    return <PinUnlockScreen vault={app.vault} onQuickExit={app.quickExit} />;
+    return <PinUnlockScreen vault={app.vault} swStatus={swStatus} onQuickExit={app.quickExit} />;
   }
 
   // 6. Solo aquí se monta el árbol protegido; la `key` descarta su estado tras cada bloqueo.
@@ -254,6 +261,7 @@ export function Shell() {
         <SettingsScreen
           settings={app.settings}
           persistence={persistence}
+          swStatus={swStatus}
           onAutoLockChange={changeAutoLock}
           onBack={goBack}
         />

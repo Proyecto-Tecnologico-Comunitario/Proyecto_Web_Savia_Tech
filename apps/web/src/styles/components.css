@@ -104,6 +104,20 @@
   background: var(--color-surface);
 }
 
+.pwa-notice {
+  display: grid;
+  gap: var(--space-2);
+  margin-block: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.pwa-notice h2 {
+  margin: 0;
+}
+
 .error {
   color: var(--color-error);
   font-weight: 600;
