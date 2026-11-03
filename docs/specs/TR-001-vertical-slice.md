@@ -1,6 +1,6 @@
 # TR-001: Vertical slice — offline, encrypted screening on a PWA
 
-- **Status:** in progress (T1–T6 implemented; T7 next)
+- **Status:** in progress (T1–T7 implemented; T8 next)
 - **Owner:** Technical Director
 - **Target:** working demo and public repository by 2026-11-03 (UNICEF deadline is 2026-11-04, 11:59 p.m. CET)
 - **Reference mock-up:** `docs/design/savia_demo.html` (flow, copy and layout only; it is vanilla JS with in-memory data, do not reuse its code)
@@ -179,6 +179,11 @@ and the Playwright lock/quick-exit tests are in place. See `docs/adr/0006-ui-she
 T6 is implemented: consent, case creation, screening, safety alert, result with the professional's
 final band, case detail, suggested referral route, content validation and the case-flow e2e tests are
 in place. See `docs/adr/0007-case-flows.md`.
+
+T7 is implemented: the generated service worker, neutral web manifest and icons, update notices,
+build budget and audit, and the offline/installability e2e tests are in place. The two-build update
+check (T7-16) passed on Chromium and is recorded in the README; the low-end Android measurement
+(T7-20) is still pending. See `docs/adr/0008-pwa-offline.md`.
 
 ## 10. Demo script (for the 2-minute video)
 
