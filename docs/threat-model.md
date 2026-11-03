@@ -1,6 +1,6 @@
 # Threat model (initial)
 
-- Status: draft, updated in TR-001 tasks T3, T4, T5 and T6. Needs review in T8.
+- Status: draft, updated in TR-001 tasks T3, T4, T5, T6 and T7. Needs review in T8.
 - System: offline-first PWA for pseudonymous psychosocial screening by frontline professionals.
 - Data: pseudonymous case code, consent record, screening answers, scores, professional decision and
   referral pathway. No names or direct identifiers are required in v1.
@@ -109,6 +109,26 @@
   quick exit from the result, language switching without losing answers, and CSP/console/network
   checks on every new screen.
 
+## Implemented PWA controls (T7)
+
+- The build generates one `dist/sw.js` with `generateSW` and an inlined Workbox runtime. `skipWaiting`
+  and `clientsClaim` are disabled, so a new worker waits and never takes over on its own.
+- The precache contains only files from the build: HTML, hashed JS/CSS, the manifest, icons and the
+  two service-worker chunks. There is no runtime caching, no `importScripts` and no third-party URL
+  except the documented Workbox warning string `https://bit.ly/wb-precache`.
+- `navigateFallback` serves `index.html` for in-app navigations. The worker does not cache API
+  responses because v1 has no API.
+- The update notice is shown on the lock screen and in Settings. Applying it is an explicit action and
+  is blocked while the vault is unlocked, so a screening in progress is not lost.
+- The web manifest uses a neutral name and geometric icons, with no description, categories,
+  shortcuts or screenshots. It is visible on the home screen and in the app switcher.
+- `npm run budget` audits the HTML (one manifest link, no inline script/style, unchanged CSP), the
+  precache (same origin, files exist, no `sw.js`), the manifest (forbidden fields and sensitive
+  terms) and the icons (PNG signature and real dimensions). CI runs it after the build.
+- Playwright covers installation, cold start offline, the full flow offline, first use offline, cache
+  contents and installability. O5 checks that the case code, the PIN and the justification are absent
+  from the caches and that `localStorage` only contains `saviatech.settings`.
+
 ## Known limitations
 
 - A PIN-derived key can be brute-forced offline if an attacker copies storage. The iteration count
@@ -154,6 +174,21 @@
   it from the app (D6, open decision).
 - T4 covers the raw IndexedDB case rows and the record cipher. The low-end Android performance
   measurement for listing and decrypting pages is still pending.
+- The installed name and icon are visible on the home screen and in the app switcher. They are
+  neutral by design but cannot be hidden.
+- The service-worker precache is visible in the browser's site data. It contains only build files and
+  no case data; O5 checks this on every run.
+- The precache and IndexedDB can be evicted by the operating system or the browser. Persistent storage
+  is requested but not guaranteed. An evicted vault cannot be recovered without the PIN, and
+  forgetting the PIN makes local data unrecoverable in v1.
+- On iOS Safari, WebKit limits storage for sites that are not used often and may evict data
+  independently of the home-screen app. This needs verification against current WebKit documentation
+  before it is stated as a guarantee; Safari and an installed home-screen app behave differently.
+- An update requires network access and an explicit action by the professional. Phones that never
+  open the app online can stay on an old version, and the update cannot be applied while the vault is
+  unlocked.
+- The update was verified on Chromium with two builds (README). A real low-end Android phone in
+  airplane mode is still pending (T7-20) and is not claimed as done.
 
 ## Out of scope for v1
 
