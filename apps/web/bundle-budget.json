@@ -1,0 +1,8 @@
+{
+  "jsGzipBytes": 256000,
+  "cssGzipBytes": 30720,
+  "indexHtmlBytes": 4096,
+  "serviceWorkerBytes": 40960,
+  "precacheBytes": 1048576,
+  "warnRatio": 0.8
+}
