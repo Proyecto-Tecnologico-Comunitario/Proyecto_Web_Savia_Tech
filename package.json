@@ -19,6 +19,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "licenses": "node scripts/check-licenses.mjs",
+    "budget": "node scripts/check-budget.mjs",
+    "icons": "node scripts/generate-icons.mjs",
     "e2e": "npm run e2e --workspace @saviatech/web",
     "e2e:install": "npx playwright install chromium"
   },

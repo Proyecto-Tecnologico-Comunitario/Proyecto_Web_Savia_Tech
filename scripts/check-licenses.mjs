@@ -19,6 +19,10 @@ const ALLOWED_LICENCES = new Set([
   'Zlib',
 ]);
 
+// Excepciones nominales aprobadas; no amplían la lista general de licencias permitidas.
+// D10 (T7): `caniuse-lite` es un dato de build de la cadena de Workbox y no entra al bundle.
+const NOMINAL_EXCEPTIONS = new Map([['caniuse-lite', 'CC-BY-4.0']]);
+
 function licenceOf(pkg) {
   if (typeof pkg.license === 'string') {
     return pkg.license;
@@ -114,7 +118,9 @@ const violations = [];
 const licenceCounts = new Map();
 
 for (const pkg of packages.values()) {
-  if (!pkg.licence || !isAllowed(pkg.licence)) {
+  const isNominalException = NOMINAL_EXCEPTIONS.get(pkg.name) === pkg.licence;
+
+  if (!pkg.licence || (!isAllowed(pkg.licence) && !isNominalException)) {
     violations.push(pkg);
     continue;
   }
