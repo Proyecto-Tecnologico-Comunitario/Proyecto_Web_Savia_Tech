@@ -32,11 +32,32 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npm run budget
 npm run licenses
 ```
 
+Install the Playwright browser once with `npm run e2e:install`, then run `npm run e2e` when the change
+touches the UI, lock, offline behaviour or the service worker.
+
 Never disable a test or lint rule to make a change pass. If a check is wrong, fix the check in its own
 change and explain why.
+
+## Documentation changes
+
+When a change touches a security or privacy control, update the documentation in the same pull
+request:
+
+- `docs/threat-model.md`: the control, the file or test that proves it, and the residual risk. If the
+  control has no automated test, say so.
+- `SECURITY.md`: the current implementation and any new limit.
+- `docs/adr/`: a new ADR for a new decision, or a new ADR with `Supersedes:` for a changed decision.
+  Never edit an accepted ADR's decision. Update `docs/adr/README.md` in the same change.
+- `README.md`: commands, demo steps, measurements or verification records that changed.
+- `docs/specs/TR-001-vertical-slice.md`: the task status when a task starts or finishes.
+
+Repository documentation is in English. The Spanish specification in `docs/specs/` stays in Spanish.
+There is no automated `docs:check` script yet; check links, ADR statuses, the index and the absence of
+placeholder text by hand.
 
 ## Dependencies
 

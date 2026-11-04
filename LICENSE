@@ -10,6 +10,9 @@ next to the code they cover:
   content/          CC-BY-4.0
   docs/             CC-BY-4.0
   scripts/ and root tooling files   MIT
+  .opencode/        third-party agent skills and configuration; not part of the
+                    app build; licensing and repository hygiene are pending
+                    (see README.md)
 
 The authoritative licence for a file is the SPDX identifier in its header or the
 LICENSE file in its component directory. If those are missing or contradictory,

@@ -1,6 +1,7 @@
 # T7 — PWA y offline: service worker, manifiesto, prueba offline y presupuesto de rendimiento
 
 **Versión:** 0.1
+**Especificación de implementación:** `docs/specs/T7-pwa-offline-spec.md` (documento compañero; este requerimiento es la base normativa).
 **Repositorio:** frontend (PWA, `proyecto-savia-tech-web`). El backend no existe en este repositorio y queda para TR-002. No lo toques ni lo simules.
 **Dependencias:** T1 a T6 terminadas. Antes de empezar, lee `AGENTS.md`, `docs/specs/TR-001-vertical-slice.md` (secciones 3, 4, 5, 7, 8 y 10), `docs/adr/0001-monorepo-and-tooling.md`, `docs/adr/0006-ui-shell.md`, `docs/adr/0007-case-flows.md`, `docs/threat-model.md` y `docs/specs/T5-ui-shell-requerimiento.md` (secciones 7 y 10).
 **Fecha objetivo:** demo y repositorio público listos el 2026-11-03 (cierre de UNICEF: 2026-11-04, 11:59 p. m. CET). Si el tiempo aprieta, el orden de prioridad es: 7a, 7b, 7c, 7d (sección 9). El presupuesto de rendimiento y la prueba offline **no** se recortan.

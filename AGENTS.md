@@ -37,8 +37,10 @@ features, speed and elegance.
 AGENTS.md  CLAUDE.md  README.md  LICENSE  SECURITY.md  CONTRIBUTING.md  CODE_OF_CONDUCT.md
 docs/specs/        requirements (start with TR-001-vertical-slice.md)
 docs/design/       UX reference mock-up (flow and copy only, not code to reuse)
-docs/adr/          architecture decision records
+docs/adr/          architecture decision records (start with README.md)
 docs/threat-model.md
+.opencode/         third-party agent skills and configuration; not part of the app build, pending a
+                   repository-hygiene decision (see T8 and the README status table)
 content/           instruments, consent text, referral samples (CC-BY-4.0, each file has metadata)
 packages/rules/    pure TypeScript engine: scoring, bands, safety alerts (no DOM, no I/O)
 apps/web/          the PWA (React + Vite)
@@ -53,7 +55,7 @@ apps/web/e2e/         Playwright lock, quick-exit, case-flow, offline, installab
 .github/workflows/ci.yml
 ```
 
-## Commands (available after task T1 of TR-001)
+## Commands
 
 ```
 npm ci            install exactly from the lockfile
@@ -61,6 +63,7 @@ npm run dev       start the web app
 npm run lint      eslint + prettier check
 npm run typecheck tsc --noEmit for all workspaces
 npm test          unit tests (vitest)
+npm run e2e:install install the Chromium build used by Playwright
 npm run e2e       end-to-end tests (playwright; lock, quick-exit, case flows, offline flow included)
 npm run build     production build
 npm run budget    build audit and size budget (run after build)
@@ -93,13 +96,15 @@ clave`. The existing Spanish specification in `docs/specs/` stays in Spanish.
 
 ## How to work
 
-1. Read `docs/specs/TR-001-vertical-slice.md` and the relevant ADRs before touching code.
+1. Read `docs/specs/TR-001-vertical-slice.md` and the relevant ADRs (index in `docs/adr/README.md`)
+   before touching code.
 2. Plan first. For each task, state your plan, assumptions and open questions, and how you will verify
    each acceptance criterion. Wait for approval before large changes.
 3. Implement one task at a time. Write tests first for `packages/rules` and the crypto module.
 4. Before saying a task is done, run lint, typecheck, tests and build, and report the results honestly.
 5. Finish with a short summary: what changed, what you were unsure about, and what needs a human decision.
-6. Record architecture decisions in `docs/adr/` (one short file each).
+6. Record architecture decisions in `docs/adr/` (one short file each) and update
+   `docs/adr/README.md` in the same change.
 7. Keep the project documentation current when a task changes behaviour, architecture, commands or
    conventions: README, task status in `docs/specs/`, threat model, SECURITY and the relevant ADRs.
 8. Do not expand scope, refactor unrelated code or add features that are not in the spec.

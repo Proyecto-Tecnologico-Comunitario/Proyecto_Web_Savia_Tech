@@ -91,8 +91,8 @@ the PIN were wrong.
   on every call, so retaining it does not bypass `lock()`.
 
 `load`, `initialize`, `unlock` and `changePin` are serialised inside one keyring. A burst of wrong PINs
-therefore cannot lose increments through a read-modify-write race. T3 exposes `lock()`; wiring the
-inactivity timer and `visibilitychange` handler belongs to the app lifecycle work in T5/T6.
+therefore cannot lose increments through a read-modify-write race. T3 exposes `lock()`; the app shell
+wires the inactivity timer and the `visibilitychange` handler.
 
 Failed attempts add waits of 0, 0, 5 seconds, 30 seconds and 5 minutes, then stay at 5 minutes. A
 successful unlock resets the counter. The wait is persisted, but it is only an in-app brake: someone
@@ -121,7 +121,8 @@ uses a short read-write transaction to compare `actualizadoEn`; a mismatch raise
 re-wraps the DEK, so case rows are unchanged.
 
 `apps/web/src/storage/persistence.ts` wraps `navigator.storage.persist()` and `estimate()`. It is not
-called at import time. The persistence warning belongs to the app shell in T5/T6.
+called at import time. The app shell requests persistence after unlock and shows the warning when the
+browser denies it.
 
 See `docs/adr/0005-case-storage.md` for the decision record.
 
@@ -175,7 +176,7 @@ benchmark.
 - There is no anti-rollback protection: an attacker with write access can restore an older ciphertext
   for the same table, id and version, and it will decrypt.
 - Metadata tampering can cause a denial of service but cannot reveal the plaintext.
-- Automatic lock triggers (inactivity and page hide) are wired by the app shell in T5/T6.
+- Automatic lock triggers (inactivity and page hide) are wired by the app shell.
 - The database and table names (`saviatech`, `cases`), the number of cases and their `actualizadoEn`
   values are visible in IndexedDB. The case code, consent and screening content stay encrypted.
 - Persistent storage is requested by `storage/persistence.ts`; backup and restore are later tasks.

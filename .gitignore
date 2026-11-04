@@ -6,10 +6,11 @@ test-results/
 *.tsbuildinfo
 *.log
 
-.env.local
-.env.*.local
+.env
+.env.*
+!.env.example
+!apps/web/.env
 *.local
 
 .DS_Store
 Thumbs.db
-
