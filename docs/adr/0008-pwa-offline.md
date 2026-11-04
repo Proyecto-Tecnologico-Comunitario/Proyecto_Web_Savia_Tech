@@ -3,6 +3,7 @@
 - Status: accepted
 - Date: 2026-11-02
 - Owners: Technical Director
+- Task: TR-001 T7
 
 ## Context
 
