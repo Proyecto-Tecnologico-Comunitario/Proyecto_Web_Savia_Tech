@@ -1,6 +1,6 @@
 # TR-001: Vertical slice — offline, encrypted screening on a PWA
 
-- **Status:** in progress (T1–T7 implemented; T8 next)
+- **Status:** in progress (T1–T8 implemented; clean-clone acceptance pending by a second person; T9 next)
 - **Owner:** Technical Director
 - **Target:** working demo and public repository by 2026-11-03 (UNICEF deadline is 2026-11-04, 11:59 p.m. CET)
 - **Reference mock-up:** `docs/design/savia_demo.html` (flow, copy and layout only; it is vanilla JS with in-memory data, do not reuse its code)
